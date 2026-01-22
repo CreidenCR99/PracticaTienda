@@ -4,16 +4,17 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Pedido {
+
     private String idPedido;
     private Cliente clientePedido;
     private LocalDate fechaPedido;
     private ArrayList<LineaPedido> cestaCompra;
 
-    public Pedido(ArrayList<LineaPedido> cestaCompra, Cliente clientePedido, LocalDate fechaPedido, String idPedido) {
-        this.cestaCompra = cestaCompra;
+    public Pedido(String idPedido, Cliente clientePedido, LocalDate fechaPedido, ArrayList<LineaPedido> cestaCompra) {
+        this.idPedido = idPedido;
         this.clientePedido = clientePedido;
         this.fechaPedido = fechaPedido;
-        this.idPedido = idPedido;
+        this.cestaCompra = cestaCompra;
     }
 
     public String getIdPedido() {
@@ -48,15 +49,24 @@ public class Pedido {
         this.cestaCompra = cestaCompra;
     }
 
+    /*@Override
+    public String toString() {
+        return "Pedido [idPedido=" + idPedido + ", clientePedido=" + clientePedido + ", fechaPedido=" + fechaPedido
+                + ", cestaCompra=" + cestaCompra + "]";
+    }*/
+
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Pedido{");
-        sb.append("idPedido=").append(idPedido);
-        sb.append(", clientePedido=").append(clientePedido);
-        sb.append(", fechaPedido=").append(fechaPedido);
-        sb.append(", cestaCompra=").append(cestaCompra);
-        sb.append('}');
-        return sb.toString();
+        return String.format("""
+        PEDIDO
+        ───────────────────────
+        ID:       %s
+        Cliente:  %s
+        Fecha:    %s
+        Cesta:    %s
+        """,
+                idPedido, clientePedido.getNombre(), fechaPedido, cestaCompra
+        );
     }
+
 }

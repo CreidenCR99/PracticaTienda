@@ -1,16 +1,17 @@
 package es.educastur.adriancr37.practicatienda;
 
 public class Cliente {
+
     private String idCliente;
     private String nombre;
     private String telefono;
     private String email;
 
-    public Cliente(String email, String idCliente, String nombre, String telefono) {
-        this.email = email;
+    public Cliente(String idCliente, String nombre, String telefono, String email) {
         this.idCliente = idCliente;
         this.nombre = nombre;
         this.telefono = telefono;
+        this.email = email;
     }
 
     public String getIdCliente() {
@@ -45,7 +46,7 @@ public class Cliente {
         this.email = email;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Cliente{");
@@ -55,5 +56,19 @@ public class Cliente {
         sb.append(", email=").append(email);
         sb.append('}');
         return sb.toString();
+    }*/
+    @Override
+    public String toString() {
+        return String.format("""
+        CLIENTE
+        ───────────────────────
+        ID:       %s
+        Nombre:   %s
+        Teléfono: %s
+        Email:    %s
+        """,
+                idCliente, nombre, telefono, email
+        );
     }
+
 }

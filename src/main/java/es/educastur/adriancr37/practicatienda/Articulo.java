@@ -7,10 +7,10 @@ public class Articulo {
     private int existencias;
     private double pvp;
 
-    public Articulo(String description, int existencias, String idArticulo, double pvp) {
+    public Articulo(String idArticulo, String description, int existencias, double pvp) {
+        this.idArticulo = idArticulo;
         this.description = description;
         this.existencias = existencias;
-        this.idArticulo = idArticulo;
         this.pvp = pvp;
     }
 
@@ -46,9 +46,23 @@ public class Articulo {
         this.pvp = pvp;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         return "Articulo [idArticulo=" + idArticulo + ", description=" + description + ", existencias=" + existencias
                 + ", pvp=" + pvp + "]";
+    }*/
+    @Override
+    public String toString() {
+        return String.format("""
+        ARTÍCULO
+        ───────────────────────
+        ID:          %s
+        Descripción: %s
+        Stock:       %d unidades
+        Precio:      %.2f €
+        """,
+                idArticulo, description, existencias, pvp
+        );
     }
+
 }
