@@ -29,7 +29,7 @@ public class PracticaTienda {
     public static void main(String[] args) {
         PracticaTienda p = new PracticaTienda();
         p.cargaDatos();
-        p.menu();
+        p.menuOpciones();
     }
 
     public void cargaDatos() {
@@ -55,18 +55,273 @@ public class PracticaTienda {
         pedidos.add(new Pedido("63921307Y-001/2025", clientes.get("63921307Y"), hoy.minusDays(4), new ArrayList<>(List.of(new LineaPedido("2-11", 5), new LineaPedido("2-33", 3), new LineaPedido("4-33", 2)))));
     }
 
-    public void menu() {
+    //#region menuOpciones
+    public void menuOpciones() {
+        int opcion;
+        do {
+            System.out.println("\n\tMENU DE OPCIONES");
+            System.out.println("\t| 0 - SALIR");
+            System.out.println("\t| 1 - MENU LISTADOS");
+            System.out.println("\t| 2 - MENU ARTICULOS");
+            System.out.println("\t| 3 - MENU CLIENTES");
+            System.out.println("\t| 4 - ");
+            System.out.println("\t| 5 - ");
+
+            System.out.print("Teclea el numero: ");
+
+            opcion = sc.nextInt();
+            System.out.println();
+
+            switch (opcion) {
+                // MENU DE OPCIONES
+                case 1 -> {
+                    menuListados();
+                }
+                case 2 -> {
+                    menuArticulos();
+                }
+                case 3 -> {
+                    menuClientes();
+                }
+                case 4 -> {
+                    menuPedidos();
+                }
+                case 5 -> {
+
+                }
+            }
+        } while (opcion != 0);
+    }
+
+    //#endregion
+    //#region Listados
+    public void menuListados() {
+        int opcion;
+        do {
+            System.out.println("\n\tMENU DE LISTADOS");
+            System.out.println("\t| 0 - SALIR");
+            System.out.println("\t| 1 - LISTADO TOTAL");
+            System.out.println("\t| 2 - LISTADO ARTICULOS");
+            System.out.println("\t| 3 - LISTADO CLIENTES");
+            System.out.println("\t| 4 - LISTADO PEDIDOS");
+            System.out.println("\t| 5 - ");
+
+            System.out.print("Teclea el numero: ");
+
+            opcion = sc.nextInt();
+            System.out.println();
+
+            switch (opcion) {
+                // MENU DE LISTADOS
+                case 1 -> {
+                    listado();
+                }
+                case 2 -> {
+                    listadoArticulos();
+                }
+                case 3 -> {
+                    listadoClientes();
+                }
+                case 4 -> {
+                    listadoPedidos();
+                }
+                case 5 -> {
+
+                }
+            }
+        } while (opcion != 0);
+    }
+
+    public void listado() {
+        listadoArticulos();
+        listadoClientes();
+        listadoPedidos();
+    }
+
+    public void listadoArticulos() {
+        System.out.println();
         for (Articulo a : articulos.values()) {
             System.out.println(a);
         }
+    }
+
+    public void listadoClientes() {
+        System.out.println();
         for (Cliente c : clientes.values()) {
             System.out.println(c);
         }
-        for (String dni : clientes.keySet()) {
-            System.out.println(dni);
-        }
+    }
+
+    public void listadoPedidos() {
+        System.out.println();
         for (Pedido p : pedidos) {
             System.out.println(p);
         }
     }
+
+    //#endregion
+    //#region Articulos
+    public void menuArticulos() {
+        int opcion;
+        do {
+            System.out.println("\n\tMENU DE ARTICULOS");
+            System.out.println("\t| 0 - SALIR");
+            System.out.println("\t| 1 - LISTADO ARTICULO");
+            System.out.println("\t| 2 - ALTA ARTICULO");
+            System.out.println("\t| 3 - BAJA ARTICULO");
+            System.out.println("\t| 4 - REPOSICION ARTICULO");
+            System.out.println("\t| 5 - ");
+
+            System.out.print("Teclea el numero: ");
+
+            opcion = sc.nextInt();
+            System.out.println();
+
+            switch (opcion) {
+                // MENU DE ARTICULOS
+                case 1 -> {
+                    listadoArticulos();
+                }
+                case 2 -> {
+                    altaArticulo();
+                }
+                case 3 -> {
+                    bajaArticulo();
+                }
+                case 4 -> {
+                    reposicionArticulos();
+                }
+                case 5 -> {
+
+                }
+            }
+        } while (opcion != 0);
+    }
+
+    public void altaArticulo() {
+        String idArticulo, descripcion, existencias, pvp;
+        System.out.println("ALTA DE NUEVO ARTICULO");
+        do { 
+            System.out.println("idArticulo (IDENTIFICADOR)");
+            idArticulo = sc.nextLine();
+        } while (!idArticulo.matches("[1-5][-][0-9][0-9]")
+        || articulos.containsKey(idArticulo));
+        System.out.println("DESCRIPCION");
+        descripcion = sc.nextLine();
+        do { 
+            System.out.println("EXISTENCIAS");
+            existencias = sc.nextLine();
+        } while (!MetodosAux.esInt(existencias));
+        do { 
+            System.out.println("PVP");
+            pvp = sc.nextLine();
+        } while (!MetodosAux.esDouble(pvp));
+    }
+
+    public void bajaArticulo() {
+
+    }
+
+    public void reposicionArticulos() {
+
+    }
+
+    //#endregion
+    //#region Clientes
+    public void menuClientes() {
+        int opcion;
+        do {
+            System.out.println("\n\tMENU DE CLIENTES");
+            System.out.println("\t| 0 - SALIR");
+            System.out.println("\t| 1 - LISTADO CLIENTE");
+            System.out.println("\t| 2 - ALTA CLIENTE");
+            System.out.println("\t| 3 - BAJA CLIENTE");
+            System.out.println("\t| 4 - MODIFICAR CLIENTE");
+            System.out.println("\t| 5 - ");
+
+            System.out.print("Teclea el numero: ");
+
+            opcion = sc.nextInt();
+            System.out.println();
+
+            switch (opcion) {
+                // MENU DE CLIENTES
+                case 1 -> {
+                    listadoClientes();
+                }
+                case 2 -> {
+                    altaCliente();
+                }
+                case 3 -> {
+                    bajaCliente();
+                }
+                case 4 -> {
+                    modificarCliente();
+                }
+                case 5 -> {
+
+                }
+            }
+        } while (opcion != 0);
+    }
+
+    public void altaCliente() {
+
+    }
+
+    public void bajaCliente() {
+
+    }
+
+    public void modificarCliente() {
+
+    }
+
+    //#endregion
+    //#region Pedidos
+    public void menuPedidos() {
+        int opcion;
+        do {
+            System.out.println("\n\tMENU DE PEDIDOS");
+            System.out.println("\t| 0 - SALIR");
+            System.out.println("\t| 1 - LISTADO PEDIDOS");
+            System.out.println("\t| 2 - NUEVO PEDIDO");
+            System.out.println("\t| 3 - TOTAL PEDIDOS");
+            System.out.println("\t| 4 - ");
+            System.out.println("\t| 5 - ");
+
+            System.out.print("Teclea el numero: ");
+
+            opcion = sc.nextInt();
+            System.out.println();
+
+            switch (opcion) {
+                // MENU DE PEDIDOS
+                case 1 -> {
+                    listadoPedidos();
+                }
+                case 2 -> {
+                    nuevoPedido();
+                }
+                case 3 -> {
+                    totalPedidos();
+                }
+                case 4 -> {
+
+                }
+                case 5 -> {
+
+                }
+            }
+        } while (opcion != 0);
+    }
+
+    public void nuevoPedido() {
+
+    }
+
+    public void totalPedidos() {
+
+    }
+    //#endregion
 }
