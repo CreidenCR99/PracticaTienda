@@ -43,6 +43,7 @@ public class PracticaTienda {
         articulos.put("2-11", new Articulo("2-11", "HDD SEAGATE 1 TB  ", 16, 80));
         articulos.put("2-22", new Articulo("2-22", "SSD KINGSTOM 256GB", 9, 70));
         articulos.put("2-33", new Articulo("2-33", "SSD KINGSTOM 512GB", 0, 200));
+        articulos.put("3-11", new Articulo("3-11", "HP LASERJET H200 ", 3, 50));
         articulos.put("3-22", new Articulo("3-22", "EPSON PRINT XP300 ", 5, 80));
         articulos.put("4-11", new Articulo("4-11", "ASUS  MONITOR  22 ", 5, 100));
         articulos.put("4-22", new Articulo("4-22", "HP MONITOR LED 28 ", 5, 180));
@@ -64,7 +65,7 @@ public class PracticaTienda {
             System.out.println("\t| 1 - MENU LISTADOS");
             System.out.println("\t| 2 - MENU ARTICULOS");
             System.out.println("\t| 3 - MENU CLIENTES");
-            System.out.println("\t| 4 - ");
+            System.out.println("\t| 4 - MENU PEDIDOS");
             System.out.println("\t| 5 - ");
 
             System.out.print("Teclea el numero: ");
@@ -198,24 +199,42 @@ public class PracticaTienda {
         } while (opcion != 0);
     }
 
-    public void altaArticulo() {
-        String idArticulo, descripcion, existencias, pvp;
+    private void altaArticulo() {
+
+        String idArticulo, descripcion, existencias, pvp; // TODAS LAS ENTRADAS COMO STRING FACILITA VALIDACION Y EVITA PROBLEMAS CON SCANNER
+
         System.out.println("ALTA DE NUEVO ARTICULO");
-        do { 
-            System.out.println("idArticulo (IDENTIFICADOR)");
+        //idArticulo VALIDADO CON EXPRESION REGULAR SENCILLA
+        do {
+            System.out.println("IdArticulo (IDENTIFICADOR):");
             idArticulo = sc.nextLine();
-        } while (!idArticulo.matches("[1-5][-][0-9][0-9]")
-        || articulos.containsKey(idArticulo));
-        System.out.println("DESCRIPCION");
+        } while (!idArticulo.matches("[1-6][-][0-9][0-9]") || articulos.containsKey(idArticulo));
+        //OJO CONTROLAR tambien QUE NO EXISTA ESE ID PREVIAMENTE
+
+        //ENTRADA DESCRIPCION SIN NINGUN TIPO DE VALIDACION
+        System.out.println("DESCRIPCION:");
         descripcion = sc.nextLine();
-        do { 
-            System.out.println("EXISTENCIAS");
-            existencias = sc.nextLine();
-        } while (!MetodosAux.esInt(existencias));
-        do { 
-            System.out.println("PVP");
-            pvp = sc.nextLine();
-        } while (!MetodosAux.esDouble(pvp));
+
+        // EXISTENCIAS CON VALIDACION DE TIPO int
+        do {
+            System.out.println("EXISTENCIAS:");
+            existencias = sc.nextLine(); //Se lee la entrada de EXISTENCIAS como un String
+        } while (!MetodosAux.esInt(existencias)); //Se sigue pidiendo la entrada si no es int
+
+        // PVP CON VALIDACION DE TIPO double
+        do {
+            System.out.println("PVP:");
+            pvp = sc.nextLine(); //Se lee la entrada del PVP como un String
+        } while (!MetodosAux.esDouble(pvp)); //Se sigue pidiendo la entrada si no es double
+
+        //AÑADO OBJETO ARTICULO A LA COLECCION PARSEANDO A int y double los datos de existencias y PVP
+        Articulo a = new Articulo(idArticulo, descripcion,
+                Integer.parseInt(existencias), Double.parseDouble(pvp));
+        articulos.put(idArticulo, a);
+        System.out.println("- Articulo añadido -");
+        /* por supuesto podría haberlo hecho con una única istrucción
+        articulos.put(idArticulo,new Articulo(idArticulo,descripcion,Integer.parseInt(existencias),Double.parseDouble(pvp)));
+         */
     }
 
     public void bajaArticulo() {
@@ -317,11 +336,42 @@ public class PracticaTienda {
     }
 
     public void nuevoPedido() {
+        String idCliente;
+        do {
+            System.out.println("DNI CLIENTE:");
+            idCliente = sc.nextLine().toUpperCase();
+        } while (!MetodosAux.validarDNI(idCliente));
 
+        ArrayList<LineaPedido> cestaCompra = new ArrayList();
+        String idArticulo;
+        int unidades = 0;
+        do {
+            System.out.print("\nTeclea el ID del articulo deseado (FIN para terminar la compra)");
+            idArticulo = sc.next();
+            System.out.print("\nTeclea las unidades deseadas");
+            unidades = sc.nextInt();
+            cestaCompra.add(new LineaPedido(idArticulo, unidades));
+        } while (idArticulo.equalsIgnoreCase("FIN"));
+
+        Pedido p = new Pedido(generaIdPedido(idCliente), clientes.get(idCliente), hoy, cestaCompra);
+        pedidos.add(p);
     }
 
     public void totalPedidos() {
 
+    }
+
+    public String generaIdPedido(String idCliente) {
+        int contador = 0;
+        String nuevoId;
+        for (Pedido p : pedidos) {
+            if (p.getClientePedido().getIdCliente().equalsIgnoreCase(idCliente)) {
+                contador++;
+            }
+        }
+        contador++;
+        nuevoId = idCliente + "-" + String.format("%o3d", contador) + "/" + hoy.getYear();
+        return nuevoId;
     }
     //#endregion
 }
