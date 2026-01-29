@@ -335,6 +335,17 @@ public class PracticaTienda {
         } while (opcion != 0);
     }
 
+    private void stock(String idArticulo, int unidades) throws StockCero, StockInsuficiente {
+        if (articulos.get(idArticulo).getExistencias() == 0) {
+            throw new StockCero("0 unidades disponibles de: "
+                    + articulos.get(idArticulo).getDescription());
+        }
+        if (articulos.get(idArticulo).getExistencias() == 0) {
+            throw new StockInsuficiente("0 unidades disponibles de: "
+                    + articulos.get(idArticulo).getDescription());
+        }
+    }
+
     public void nuevoPedido() {
         String idCliente;
         do {
@@ -345,16 +356,44 @@ public class PracticaTienda {
         ArrayList<LineaPedido> cestaCompra = new ArrayList();
         String idArticulo;
         int unidades = 0;
-        do {
-            System.out.print("\nTeclea el ID del articulo deseado (FIN para terminar la compra)");
-            idArticulo = sc.next();
+        System.out.print("\nTeclea el ID del articulo deseado (FIN para terminar la compra)");
+        idArticulo = sc.next();
+        while (idArticulo.equalsIgnoreCase("FIN")) {
             System.out.print("\nTeclea las unidades deseadas");
             unidades = sc.nextInt();
-            cestaCompra.add(new LineaPedido(idArticulo, unidades));
-        } while (idArticulo.equalsIgnoreCase("FIN"));
-
-        Pedido p = new Pedido(generaIdPedido(idCliente), clientes.get(idCliente), hoy, cestaCompra);
-        pedidos.add(p);
+            try {
+                stock(idArticulo, unidades);
+                cestaCompra.add(new LineaPedido(idArticulo, unidades));
+            } catch (StockCero ex) {
+                System.out.println(ex.getMessage());
+            } catch (StockInsuficiente ex) {
+                System.out.println(ex.getMessage());
+                System.out.println("Las quieres (Si/No)");
+                String respuesta = sc.next();
+                if (respuesta.equalsIgnoreCase("si")) {
+                    cestaCompra.add(new LineaPedido(idArticulo, articulos.get(idArticulo).getExistencias()));
+                    articulos.get(idArticulo).setExistencias(0);
+                }
+            }
+            System.out.println("\nTeclea el ID del articulo deseado (FIN para terminar la compra)");
+            idArticulo = sc.next();
+        }
+        if (!cestaCompra.isEmpty()) {
+            System.out.println("Este es tu pedido");
+            for (LineaPedido l : cestaCompra) {
+                System.out.println(l.getIdArticulo() + "-"
+                        + articulos.get(l.getIdArticulo()).getDescription() + "-" + l.getUnidades());
+            }
+            System.out.println("Procedemos con la compra (Si/No)");
+            String respuesta = sc.next();
+            if (respuesta.equalsIgnoreCase("si")) {
+                pedidos.add(new Pedido(respuesta, null, hoy, cestaCompra));
+                for (LineaPedido l : cestaCompra) {
+                    articulos.get(l.getIdArticulo())
+                    .setExistencias(articulos.get(l.getIdArticulo()).getExistencias() - l.getUnidades());
+                }
+            }
+        }
     }
 
     public void totalPedidos() {
