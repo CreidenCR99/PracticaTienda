@@ -54,7 +54,8 @@ public class Articulo {
     @Override
     public String toString() {
         return String.format("""
-        ARTÍCULO
+        
+        \tARTÍCULO
         ───────────────────────
         ID:          %s
         Descripción: %s

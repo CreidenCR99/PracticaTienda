@@ -60,7 +60,8 @@ public class Cliente {
     @Override
     public String toString() {
         return String.format("""
-        CLIENTE
+        
+        \tCLIENTE
         ───────────────────────
         ID:       %s
         Nombre:   %s

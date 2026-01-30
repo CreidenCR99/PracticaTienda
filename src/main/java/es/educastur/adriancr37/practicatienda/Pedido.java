@@ -58,7 +58,8 @@ public class Pedido {
     @Override
     public String toString() {
         return String.format("""
-        PEDIDO
+        
+        \tPEDIDO
         ───────────────────────
         ID:       %s
         Cliente:  %s
