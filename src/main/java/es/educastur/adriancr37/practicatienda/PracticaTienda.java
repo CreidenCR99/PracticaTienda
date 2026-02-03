@@ -22,9 +22,9 @@ public class PracticaTienda {
     LocalDate hoy = LocalDate.now();
 
     public PracticaTienda() {
-        pedidos = new ArrayList();
-        articulos = new HashMap();
-        clientes = new HashMap();
+        pedidos = new ArrayList<>();
+        articulos = new HashMap<>();
+        clientes = new HashMap<>();
     }
 
     public static void main(String[] args) {
@@ -137,6 +137,17 @@ public class PracticaTienda {
         for (Articulo a : articulos.values()) {
             System.out.println(a);
         }
+
+        articulos.values().stream().forEach(a -> System.out.println(a));
+
+        ArrayList<Articulo> articulosAux = new ArrayList(articulos.values());
+
+        System.out.println("\nListados de articulos que valgan menos de 100");
+        articulosAux.stream()
+                .filter(a -> a.getPvp() < 100)
+                .sorted(Comparator.comparing(Articulo::getPvp))
+                .sorted(Comparator.comparing(a -> a.getPvp()))
+                .forEach(a -> System.out.println(a));
     }
 
     public void listadoClientes() {
@@ -153,12 +164,14 @@ public class PracticaTienda {
         }
 
         System.out.println("\nListados de menor a mayor");
-        pedidos.stream().sorted(Comparator.comparing(p -> totalPedido(p)))
+        pedidos.stream()
+                .sorted(Comparator.comparing(p -> totalPedido(p)))
                 .forEach(p -> System.out.println(p + "Total:\t" + totalPedido(p))
                 );
 
         System.out.println("\nListados de mayor a menor");
-        pedidos.stream().sorted(Comparator.comparing(p -> totalPedido((Pedido)p)).reversed())
+        pedidos.stream()
+                .sorted(Comparator.comparing(p -> totalPedido((Pedido) p)).reversed())
                 .forEach(p -> System.out.println(p + "Total:\t" + totalPedido(p))
                 );
 

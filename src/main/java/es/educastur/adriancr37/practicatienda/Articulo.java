@@ -60,7 +60,7 @@ public class Articulo {
         ID:          %s
         Descripción: %s
         Stock:       %d unidades
-        Precio:      %.2f €
+        Precio:      %.2f
         """,
                 idArticulo, description, existencias, pvp
         );

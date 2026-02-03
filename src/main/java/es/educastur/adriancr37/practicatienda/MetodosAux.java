@@ -9,6 +9,7 @@ public class MetodosAux {
      * @return true si es Int, false si no lo es
      */
     public static boolean esInt(String s) {
+        @SuppressWarnings("unused")
         int n;
         try {
             n = Integer.parseInt(s);
@@ -25,6 +26,7 @@ public class MetodosAux {
      * @return true si es Double, false si no lo es
      */
     public static boolean esDouble(String s) {
+        @SuppressWarnings("unused")
         double n;
         try {
             n = Double.parseDouble(s);
