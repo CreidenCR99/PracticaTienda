@@ -2,11 +2,14 @@ package es.educastur.adriancr37.practicatienda;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+// import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -38,12 +41,24 @@ public class MetodosAuxTest {
      */
     @Test
     public void testEsInt() {
+        
+        // Asserts sueltos, si falla uno, no sabre cual es
         assertTrue(MetodosAux.esInt("5"));
         assertTrue(MetodosAux.esInt("-5"));
         assertFalse(MetodosAux.esInt("5555555555"));
         assertFalse(MetodosAux.esInt("5.5"));
         assertFalse(MetodosAux.esInt("-5.5"));
         assertFalse(MetodosAux.esInt("Cinco"));
+
+        // Asserts en bloque (assertAll), si falla uno, sabre cual es
+        assertAll(
+            () -> assertTrue(MetodosAux.esInt("5")),
+            () -> assertTrue(MetodosAux.esInt("-5")),
+            () -> assertFalse(MetodosAux.esInt("5555555555")),
+            () -> assertFalse(MetodosAux.esInt("5.5")),
+            () -> assertFalse(MetodosAux.esInt("-5.5")),
+            () -> assertFalse(MetodosAux.esInt("Cinco"))
+        );
     }
 
     /**

@@ -21,6 +21,37 @@ public class PracticaTienda {
     private HashMap<String, Cliente> clientes;
     LocalDate hoy = LocalDate.now();
 
+    public ArrayList<Pedido> getPedidos() {
+        return pedidos;
+    }
+
+    public void setPedidos(ArrayList<Pedido> pedidos) {
+        this.pedidos = pedidos;
+    }
+
+    public HashMap<String, Articulo> getArticulos() {
+        return articulos;
+    }
+
+    public void setArticulos(HashMap<String, Articulo> articulos) {
+        this.articulos = articulos;
+    }
+
+    public HashMap<String, Cliente> getClientes() {
+        return clientes;
+    }
+
+    public void setClientes(HashMap<String, Cliente> clientes) {
+        this.clientes = clientes;
+    }
+
+    private static String[] nombreSecciones = {
+        "1 - Perifericos",
+        "2 - Almacenamiento",
+        "3 - Impresoras",
+        "4 - Monitores"
+    };
+
     public PracticaTienda() {
         pedidos = new ArrayList<>();
         articulos = new HashMap<>();
@@ -28,9 +59,10 @@ public class PracticaTienda {
     }
 
     public static void main(String[] args) {
-        PracticaTienda p = new PracticaTienda();
-        p.cargaDatos();
-        p.menuOpciones();
+        PracticaTienda t = new PracticaTienda();
+        t.cargaDatos();
+        //t.menuOpciones();
+        t.menuExamen();
     }
 
     public void cargaDatos() {
@@ -57,7 +89,171 @@ public class PracticaTienda {
         pedidos.add(new Pedido("63921307Y-001/2025", clientes.get("63921307Y"), hoy.minusDays(4), new ArrayList<>(List.of(new LineaPedido("2-11", 5), new LineaPedido("2-33", 3), new LineaPedido("4-33", 2)))));
     }
 
+    //#region Examen 05/02/2026
+    public void menuExamen() {
+        int opcion;
+        do {
+            System.out.println("\n\tMENU DE OPCIONES DEL EXAMEN");
+            System.out.println("\t| 0 - SALIR");
+            System.out.println("\t| 1 - LISTADO DE ARTICULOS DE UNA SECCION");
+            System.out.println("\t| 2 - LISTADO TOTAL DE ARTICULOS POR SECCION");
+            System.out.println("\t| 3 - PEDIDOS DE UN CLIENTE Y TOTAL GASTADO");
+            System.out.println("\t| 4 - LISTADO DE TODOS LOS ARTICULOS, SEGUN LAS UNIDADES VENDIDAS DE CADA UNO ORDENADO DE > A <");
+            System.out.println("\t| 5 - LISTADO DE LOS CLIENTES SIN PEDIDO");
+
+            System.out.print("Teclea el numero: ");
+
+            opcion = sc.nextInt();
+            System.out.println();
+
+            switch (opcion) {
+                // MENU DE OPCIONES DEL EXAMEN
+                case 1 -> {
+                    uno(); // articulosSeccion
+                }
+                case 2 -> {
+                    dos();
+                }
+                case 3 -> {
+                    tres(); // pedidosCliente
+                }
+                case 4 -> {
+                    cuatro(); // articulosUnidadesVendidas
+                }
+                case 5 -> {
+                    cinco(); // clientesSinPedido
+                }
+            }
+        } while (opcion != 0);
+    }
+
+    // Ejercicio 1 - articulosSeccion
+    public void uno() {
+        sc.nextLine();
+        ArrayList<Articulo> articulosAux = new ArrayList<>(articulos.values());
+        String seccion;
+
+        System.out.println(nombreSecciones[0] + "\n" + nombreSecciones[1] + "\n" + nombreSecciones[2] + "\n" + nombreSecciones[3]);
+
+        do {
+            System.out.print("Teclea el numero de la seccion: ");
+            seccion = sc.next();
+            if (!MetodosAux.esInt(seccion)) {
+                System.out.println("Error: Introduce un número válido.");
+            }
+        } while (!MetodosAux.esInt(seccion));
+
+        String strSeccion = seccion;
+        int numSeccion = Integer.parseInt(seccion);
+
+        if (numSeccion >= 1 && numSeccion <= nombreSecciones.length) {
+            String nombreSeccion = nombreSecciones[numSeccion - 1];
+            System.out.println("\nListados de articulos de la seccion: " + nombreSeccion);
+
+            articulosAux.stream()
+                    .filter(a -> a.getIdArticulo().startsWith(strSeccion))
+                    .forEach(System.out::println);
+        } else {
+            System.out.println("La sección seleccionada no existe.");
+        }
+    }
+
+    // Ejercicio 2 - listarTodasSecciones
+    public void dos() {
+        ArrayList<Articulo> articulosAux = new ArrayList<>(articulos.values());
+
+        System.out.println("\nListados de articulos de la seccion: " + nombreSecciones[0]);
+
+        articulosAux.stream()
+                .filter(a -> a.getIdArticulo().startsWith("1"))
+                .forEach(System.out::println);
+
+        System.out.println("\nListados de articulos de la seccion: " + nombreSecciones[1]);
+
+        articulosAux.stream()
+                .filter(a -> a.getIdArticulo().startsWith("2"))
+                .forEach(System.out::println);
+
+        System.out.println("\nListados de articulos de la seccion: " + nombreSecciones[2]);
+
+        articulosAux.stream()
+                .filter(a -> a.getIdArticulo().startsWith("3"))
+                .forEach(System.out::println);
+
+        System.out.println("\nListados de articulos de la seccion: " + nombreSecciones[3]);
+
+        articulosAux.stream()
+                .filter(a -> a.getIdArticulo().startsWith("4"))
+                .forEach(System.out::println);
+
+    }
+
+    // Ejercicio 3 - pedidosCliente y totalGastado
+    public void tres() {
+        sc.nextLine();
+        String idCliente;
+        do {
+            System.out.print("DNI CLIENTE: ");
+            idCliente = sc.nextLine().toUpperCase().trim();
+            if (!clientes.containsKey(idCliente)) {
+                System.out.println("No eres cliente");
+            }
+        } while (!MetodosAux.validarDNI(idCliente));
+        System.out.println();
+        String strIdCliente = idCliente;
+
+        System.out.println("\nListado de pedidos por clientes");
+        pedidos.stream()
+                .filter(p -> p.getClientePedido().getIdCliente().equals(strIdCliente))
+                .forEach(p -> System.out.println(p + "Total:\t" + totalPedido(p))
+                );
+        System.out.println("El cliente se ha gastado en total: " + totalGastado(idCliente));
+        System.out.println();
+    }
+
+    private double totalGastado(String idCliente) {
+        int total = 0;
+        for (Pedido p : pedidos) {
+            if (idCliente.equals(p.getClientePedido().getIdCliente())) {
+                total += totalPedido(p);
+                System.out.println();
+            }
+        }
+        return total;
+    }
+
+    // Ejercicio 4 - articulosUnidadesVendidas
+    public void cuatro() {
+        ArrayList<Articulo> articulosAux = new ArrayList<>(articulos.values());
+
+        System.out.println("\nListado de articulos y unidades vendidas");
+        articulosAux.stream()
+                .sorted(Comparator.comparing(a -> totalVendido((Articulo) a)).reversed())
+                .forEach(a -> System.out.println(a.getDescription() + "\tTotal vendido: " + totalVendido(a))
+        );
+    }
+
+    // Ejercicio 5 - clientesSinPedido
+    public void cinco() {
+        ArrayList<Cliente> clientesAux = new ArrayList<>(clientes.values());
+        System.out.println("Clientes sin pedidos:");
+        for (Cliente c : clientesAux) {
+            int cont = 0;
+            for (Pedido p : pedidos) {
+                if (c.equals(p.getClientePedido())) {
+                    cont++;
+                    break;
+                }
+            }
+            if (cont == 0) {
+                System.out.println(c.toString());
+                System.out.println();
+            }
+        }
+    }
+    //#endregion 
     //#region menuOpciones
+
     public void menuOpciones() {
         int opcion;
         do {
@@ -437,12 +633,24 @@ public class PracticaTienda {
         }
     }
 
-    private double totalPedido(Pedido p) {
+    public double totalPedido(Pedido p) {
         double totalPedido = 0;
         for (LineaPedido l : p.getCestaCompra()) {
             totalPedido += l.getUnidades() * articulos.get(l.getIdArticulo()).getPvp();
         }
         return totalPedido;
+    }
+
+    public int totalVendido(Articulo a) {
+        int totalVendido = 0;
+        for (Pedido p : pedidos) {
+            for (LineaPedido l : p.getCestaCompra()) {
+                if (a.getIdArticulo().equals(l.getIdArticulo())) {
+                totalVendido += l.getUnidades();                    
+                }
+            }
+        }
+        return totalVendido;
     }
 
     public String generaIdPedido(String idCliente) {
