@@ -14,11 +14,11 @@ public class Articulo {
         this.pvp = pvp;
     }
 
-    public String getIdArticulo() {
+    public String getArticulo() {
         return idArticulo;
     }
 
-    public void setIdArticulo(String idArticulo) {
+    public void setArticulo(String idArticulo) {
         this.idArticulo = idArticulo;
     }
 
