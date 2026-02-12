@@ -267,7 +267,6 @@ public class PracticaTienda {
             System.out.println("\t| 4 - MENU PEDIDOS");
             System.out.println("\t| 5 - MENU EXAMEN");
 
-
             System.out.print("Teclea el numero: ");
 
             opcion = sc.nextInt();
@@ -676,14 +675,15 @@ public class PracticaTienda {
         nuevoId = idCliente + "-" + String.format("%o3d", contador) + "/" + hoy.getYear();
         return nuevoId;
     }
+
     //#endregion
     //#region Streams
     private void listadosStreams() {
 
         articulos.values().stream()
-        .filter(a->a.getPvp()<100)
-        .sorted(Comparator.comparing(a->a.getPvp()))
-        .forEach(System.out::println);
+                .filter(a -> a.getPvp() < 100)
+                .sorted(Comparator.comparing(a -> a.getPvp()))
+                .forEach(System.out::println);
 
         System.out.println("\nListados de mayor a menor");
         pedidos.stream()
@@ -692,12 +692,54 @@ public class PracticaTienda {
                 );
 
         long numPedidos = pedidos.stream()
-        .filter(p-> p.getClientePedido().getIdCliente().equalsIgnoreCase("80580845T"))
-        .count();
+                .filter(p -> p.getClientePedido().getIdCliente().equalsIgnoreCase("80580845T"))
+                .count();
         System.out.println(numPedidos);
-        Map<Cliente, Long> numPedidosPorCliente =
-        pedidos.stream().collect(Collectors.groupingBy(Pedido::getClientePedido,Collectors.counting()));
+        Map<Cliente, Long> numPedidosPorCliente
+                = pedidos.stream().collect(Collectors.groupingBy(Pedido::getClientePedido, Collectors.counting()));
         System.out.println(numPedidosPorCliente);
+
+        System.out.println("\n");
+        for (Articulo a : articulos.values()) {
+            int total = 0;
+            for (Pedido p : pedidos) {
+                total += p.getCestaCompra().stream()
+                        .filter(l -> l.getArticulo().equals(a))
+                        .mapToInt(LineaPedido::getUnidades)
+                        .sum();
+            }
+            System.out.println(a + " - " + total);
+        }
+    }
+
+    private int unidadesVendidas1(Articulo a) { // Noob
+        int total = 0;
+        for (Pedido p : pedidos) {
+            for (LineaPedido lp : p.getCestaCompra()) {
+                if (lp.getArticulo().equals(a)) {
+                    total += lp.getUnidades();
+                }
+            }
+        }
+        return total;
+    }
+
+    private int unidadesVendidas2(Articulo a) { // Pro
+        int total = 0;
+        for (Pedido p : pedidos) {
+            total += p.getCestaCompra().stream()
+                    .filter(l -> l.getArticulo().equals(a))
+                    .mapToInt(LineaPedido::getUnidades)
+                    .sum();
+        }
+        return total;
+    }
+
+    private int unidadesVendidas3(Articulo a) { // Hacker
+        return pedidos.stream().flatMap(p -> p.getCestaCompra().stream())
+                .filter(l -> l.getArticulo().equals(a))
+                .mapToInt(LineaPedido::getUnidades)
+                .sum();
     }
     //#endregion
 }

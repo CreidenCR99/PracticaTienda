@@ -7,6 +7,8 @@
 
 ## Tecnicas
 
+**ArrayLists**
+
 **HasMaps**
 
 **Uso de la programación funcional:**
@@ -14,7 +16,7 @@
 - *Streams*
 - *Filtros de ordenación*
 
-**Tests**
+**jUnit Tests**
 
 ---
 
@@ -25,6 +27,7 @@
 - *Clientes*
 - *Articulos*
 - *Pedidos*
+- *Streams*
 
 **Alta cliente**
 
@@ -34,7 +37,7 @@
 **Realizar pedido**
 
 - *Genera ID de pedido*
-- *Te dice el precio*
+- *Calcula precio*
 
 **Comprobar stock**
 
@@ -50,3 +53,7 @@
 - *esInt*
 - *esDouble*
 - *validarDNI*
+
+**PracticaTienda:**
+
+- *totalPedido*
