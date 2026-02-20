@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * PracticaTienda
  *
  * @author Adrián Cuervo - CreidenCR99
- * @version 19/02/26
+ * @version 20/02/26
  */
 public class PracticaTienda {
 
@@ -64,8 +64,9 @@ public class PracticaTienda {
     public static void main(String[] args) {
         PracticaTienda t = new PracticaTienda();
         t.cargaDatos();
-        t.menuOpciones();
-        //t.menuExamen();
+        //t.menuOpciones();
+        //t.menuExamen0502026();
+        t.menuExamen2002026();
     }
 
     public void cargaDatos() {
@@ -92,8 +93,120 @@ public class PracticaTienda {
         pedidos.add(new Pedido("63921307Y-001/2025", clientes.get("63921307Y"), hoy.minusDays(4), new ArrayList<>(List.of(new LineaPedido(articulos.get("2-11"), 5), new LineaPedido(articulos.get("2-33"), 3), new LineaPedido(articulos.get("4-33"), 2)))));
     }
 
+    //#region Examen 20/02/2026
+    public void menuExamen2002026() {
+        int opcion;
+        do {
+            System.out.println("\n\tMENU DE OPCIONES DEL EXAMEN");
+            System.out.println("\t| 0 - SALIR");
+            System.out.println("\t| 1 - Listado de los clientes ordenados de Mayor a Menor por su GASTO");
+            System.out.println("\t| 2 - Listado de los artículos de una sección");
+            System.out.println("\t| 3 - Crear y mostrar una NUEVA colección (tipo de colección libre) llamada articulosNoVendidos");
+            System.out.println("\t| 4 - Total facturado en la tienda en los últimos 5 días");
+            System.out.println("\t| 5 -  Importe medio de todos los pedidos de la tienda");
+
+            System.out.print("Teclea el numero: ");
+
+            opcion = sc.nextInt();
+            System.out.println();
+
+            switch (opcion) {
+                // MENU DE OPCIONES DEL EXAMEN
+                case 1 -> {
+                    ejercicioUno();
+                }
+                case 2 -> {
+                    ejercicioDos();
+                }
+                case 3 -> {
+                    ejercicioTres();
+                }
+                case 4 -> {
+                    ejercicioCuatro();
+                }
+                case 5 -> {
+                    ejercicioCinco();
+                }
+            }
+        } while (opcion != 0);
+    }
+
+    // Ejercicio 1 - Listado de los clientes ordenados de Mayor a Menor por su GASTO
+    public void ejercicioUno() {
+        ArrayList<Cliente> clientesAux = new ArrayList<>(clientes.values());
+
+        clientesAux.stream()
+                .sorted(Comparator.comparing(c -> totalGastado(((Cliente) c).getIdCliente())).reversed())
+                .forEach(c -> System.out.println(c + "Total Gastado: " + totalGastado(c.getIdCliente())));
+    }
+
+    // Ejercicio 2 - Listado de los artículos de una sección
+    public void ejercicioDos() {
+        sc.nextLine();
+        ArrayList<Articulo> articulosAux = new ArrayList<>(articulos.values());
+        String seccion;
+
+        System.out.println(nombreSecciones[0] + "\n" + nombreSecciones[1] + "\n" + nombreSecciones[2] + "\n" + nombreSecciones[3]);
+
+        do {
+            System.out.print("Teclea el numero de la seccion: ");
+            seccion = sc.next();
+            if (!MetodosAux.esInt(seccion)) {
+                System.out.println("Error: Introduce un número válido.");
+            }
+        } while (!MetodosAux.esInt(seccion));
+
+        String strSeccion = seccion;
+        int numSeccion = Integer.parseInt(seccion);
+
+        if (numSeccion >= 1 && numSeccion <= nombreSecciones.length) {
+            String nombreSeccion = nombreSecciones[numSeccion - 1];
+            System.out.println("\nListados de articulos de la seccion: " + nombreSeccion);
+
+            articulosAux.stream()
+                    .filter(a -> a.getArticulo().startsWith(strSeccion))
+                    .filter(a -> a.getExistencias() > 0)
+                    .sorted(Comparator.comparing(Articulo::getPvp).reversed())
+                    .forEach(a -> System.out.println(a + "Unidades:\t" + a.getExistencias()));
+        } else {
+            System.out.println("La sección seleccionada no existe.");
+        }
+    }
+
+    // Ejercicio 3 - Crear y mostrar una NUEVA colección (tipo de colección libre) llamada articulosNoVendidos
+    public void ejercicioTres() {
+        List<Articulo> articulosNoVendidos
+                = articulos.values().stream()
+                        .filter(a -> totalVendido(a) == 0)
+                        .collect(Collectors.toList());
+        if (articulosNoVendidos.isEmpty()) {
+            System.out.println("Todos los articulos se han vendido al menos una vez.");
+        } else {
+            articulosNoVendidos.forEach(System.out::println);
+        }
+    }
+
+    // Ejercicio 4 - Total facturado en la tienda en los últimos 5 días
+    public void ejercicioCuatro() {
+        LocalDate fechaLimite = LocalDate.now().minusDays(5);
+        double total = pedidos.stream()
+                .filter(p -> p.getFechaPedido().isAfter(fechaLimite) && p.getFechaPedido().isBefore(hoy))
+                .mapToDouble(p -> totalPedido(p))
+                .sum();
+        System.out.println("Total facturado entre " + fechaLimite + " y " + hoy + ": " + total);
+    }
+
+    // Ejercicio 5 -  Importe medio de todos los pedidos de la tienda
+    public void ejercicioCinco() {
+        double media = pedidos.stream()
+                .mapToDouble(p -> totalPedido(p))
+                .average().orElse(0.0);
+        System.out.println("Importe medio Pedidos TIENDA: " + media);
+    }
+    //#endregion
+
     //#region Examen 05/02/2026
-    public void menuExamen() {
+    public void menuExamen0502026() {
         int opcion;
         do {
             System.out.println("\n\tMENU DE OPCIONES DEL EXAMEN");
@@ -214,17 +327,6 @@ public class PracticaTienda {
         System.out.println();
     }
 
-    private double totalGastado(String idCliente) {
-        int total = 0;
-        for (Pedido p : pedidos) {
-            if (idCliente.equals(p.getClientePedido().getIdCliente())) {
-                total += totalPedido(p);
-                System.out.println();
-            }
-        }
-        return total;
-    }
-
     // Ejercicio 4 - articulosUnidadesVendidas
     public void cuatro() {
         ArrayList<Articulo> articulosAux = new ArrayList<>(articulos.values());
@@ -312,7 +414,8 @@ public class PracticaTienda {
             System.out.println("\t| 2 - MENU ARTICULOS");
             System.out.println("\t| 3 - MENU CLIENTES");
             System.out.println("\t| 4 - MENU PEDIDOS");
-            System.out.println("\t| 5 - MENU EXAMEN");
+            System.out.println("\t| 5 - MENU EXAMEN 05/02/2026");
+            System.out.println("\t| 5 - MENU EXAMEN 20/02/2026");
 
             System.out.print("Teclea el numero: ");
 
@@ -334,7 +437,10 @@ public class PracticaTienda {
                     menuPedidos();
                 }
                 case 5 -> {
-                    menuExamen();
+                    menuExamen0502026();
+                }
+                case 6 -> {
+                    menuExamen2002026();
                 }
             }
         } while (opcion != 0);
@@ -708,6 +814,17 @@ public class PracticaTienda {
             }
         }
         return totalVendido;
+    }
+
+    private double totalGastado(String idCliente) {
+        int total = 0;
+        for (Pedido p : pedidos) {
+            if (idCliente.equals(p.getClientePedido().getIdCliente())) {
+                total += totalPedido(p);
+                System.out.println();
+            }
+        }
+        return total;
     }
 
     public String generaIdPedido(String idCliente) {
