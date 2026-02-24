@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * PracticaTienda
  *
  * @author Adrián Cuervo - CreidenCR99
- * @version 20/02/26
+ * @version 24/02/26
  */
 public class PracticaTienda {
 
@@ -164,8 +164,8 @@ public class PracticaTienda {
             System.out.println("\nListados de articulos de la seccion: " + nombreSeccion);
 
             articulosAux.stream()
-                    .filter(a -> a.getArticulo().startsWith(strSeccion))
-                    .filter(a -> a.getExistencias() > 0)
+                    .filter(a -> a.getArticulo().startsWith(strSeccion) && a.getExistencias() > 0)
+                    // .filter(a -> a.getExistencias() > 0)
                     .sorted(Comparator.comparing(Articulo::getPvp).reversed())
                     .forEach(a -> System.out.println(a + "Unidades:\t" + a.getExistencias()));
         } else {
@@ -712,14 +712,14 @@ public class PracticaTienda {
         } while (opcion != 0);
     }
 
-    private void stock(String idArticulo, int unidades) throws StockCero, StockInsuficiente {
-        if (articulos.get(idArticulo).getExistencias() == 0) {
+    private void stock(Articulo a, int unidades) throws StockCero, StockInsuficiente {
+        if (a.getExistencias() == 0) {
             throw new StockCero("0 unidades disponibles de: "
-                    + articulos.get(idArticulo).getDescription());
+                    + a.getDescription());
         }
-        if (articulos.get(idArticulo).getExistencias() < unidades) {
-            throw new StockInsuficiente("\nSolo hay " + articulos.get(idArticulo).getExistencias()
-                    + " unidades disponibles de: " + articulos.get(idArticulo).getDescription());
+        if (a.getExistencias() < unidades) {
+            throw new StockInsuficiente("\nSolo hay " + a.getExistencias()
+                    + " unidades disponibles de: " + a.getDescription());
         }
     }
 
@@ -735,16 +735,16 @@ public class PracticaTienda {
         } while (!MetodosAux.validarDNI(idCliente));
 
         ArrayList<LineaPedido> cestaCompra = new ArrayList<>();
-        String articulo;
+        String idArticulo;
         int unidades;
         System.out.println("\n\t(FIN para terminar la compra)");
         while (true) {
             System.out.print("Teclea el ID del articulo deseado: ");
-            articulo = sc.nextLine().trim();
-            if (articulo.equalsIgnoreCase("fin")) {
+            idArticulo = sc.nextLine().trim();
+            if (idArticulo.equalsIgnoreCase("fin")) {
                 break;
             }
-            if (!articulos.containsKey(articulo)) {
+            if (!articulos.containsKey(idArticulo)) {
                 System.out.println("Articulo no encontrado.");
                 continue;
             }
@@ -755,9 +755,10 @@ public class PracticaTienda {
                 continue;
             }
             unidades = Integer.parseInt(unidadesStr);
+            Articulo a = articulos.get(idArticulo);
             try {
-                stock(articulo, unidades);
-                cestaCompra.add(new LineaPedido(articulos.get(articulo), unidades));
+                stock(a, unidades);
+                cestaCompra.add(new LineaPedido(a, unidades));
             } catch (StockCero ex) {
                 System.out.println(ex.getMessage());
             } catch (StockInsuficiente ex) {
@@ -765,10 +766,10 @@ public class PracticaTienda {
                 System.out.print("Las quieres (Si/No) ");
                 String respuesta = sc.nextLine();
                 if (respuesta.equalsIgnoreCase("si")) {
-                    int stockDisponible = articulos.get(articulo).getExistencias();
+                    int stockDisponible = a.getExistencias();
                     if (stockDisponible > 0) {
-                        cestaCompra.add(new LineaPedido(articulos.get(articulo), stockDisponible));
-                        articulos.get(articulo).setExistencias(0);
+                        cestaCompra.add(new LineaPedido(a, stockDisponible));
+                        a.setExistencias(0);
                     }
                 }
             }
@@ -836,7 +837,7 @@ public class PracticaTienda {
             }
         }
         contador++;
-        nuevoId = idCliente + "-" + String.format("%o3d", contador) + "/" + hoy.getYear();
+        nuevoId = idCliente + "-" + String.format("%03d", contador) + "/" + hoy.getYear();
         return nuevoId;
     }
 

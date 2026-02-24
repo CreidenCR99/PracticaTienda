@@ -42,14 +42,15 @@ public class MetodosAuxTest {
     @Test
     public void testEsInt() {
         
-        // Asserts sueltos, si falla uno, no sabre cual es
+        /* Asserts sueltos, si falla uno, no sabre cual es
         assertTrue(MetodosAux.esInt("5"));
         assertTrue(MetodosAux.esInt("-5"));
         assertFalse(MetodosAux.esInt("5555555555"));
         assertFalse(MetodosAux.esInt("5.5"));
         assertFalse(MetodosAux.esInt("-5.5"));
         assertFalse(MetodosAux.esInt("Cinco"));
-
+        */
+       
         // Asserts en bloque (assertAll), si falla uno, sabre cual es
         assertAll(
             () -> assertTrue(MetodosAux.esInt("5")),
