@@ -1,13 +1,22 @@
 package es.educastur.adriancr37.practicatienda;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -64,13 +73,13 @@ public class PracticaTienda {
     public static void main(String[] args) {
         PracticaTienda t = new PracticaTienda();
         t.cargaDatos();
-        //t.menuOpciones();
+        t.menuOpciones();
         //t.menuExamen0502026();
-        t.menuExamen2002026();
+        //t.menuExamen2002026();
     }
 
     public void cargaDatos() {
-        clientes.put("80580845T", new Cliente("80580845T", "ANA ", "658111111", "ana@gmail.com"));
+        clientes.put("80580845T", new Cliente("80580845T", "ANA", "658111111", "ana@gmail.com"));
         clientes.put("36347775R", new Cliente("36347775R", "LOLA", "649222222", "lola@gmail.com"));
         clientes.put("63921307Y", new Cliente("63921307Y", "JUAN", "652333333", "juan@gmail.com"));
         clientes.put("02337565Y", new Cliente("02337565Y", "EDU", "634567890", "edu@gmail.com"));
@@ -143,7 +152,6 @@ public class PracticaTienda {
     // Ejercicio 2 - Listado de los artículos de una sección
     public void ejercicioDos() {
         sc.nextLine();
-        ArrayList<Articulo> articulosAux = new ArrayList<>(articulos.values());
         String seccion;
 
         System.out.println(nombreSecciones[0] + "\n" + nombreSecciones[1] + "\n" + nombreSecciones[2] + "\n" + nombreSecciones[3]);
@@ -163,7 +171,7 @@ public class PracticaTienda {
             String nombreSeccion = nombreSecciones[numSeccion - 1];
             System.out.println("\nListados de articulos de la seccion: " + nombreSeccion);
 
-            articulosAux.stream()
+            articulos.values().stream()
                     .filter(a -> a.getArticulo().startsWith(strSeccion) && a.getExistencias() > 0)
                     // .filter(a -> a.getExistencias() > 0)
                     .sorted(Comparator.comparing(Articulo::getPvp).reversed())
@@ -414,8 +422,10 @@ public class PracticaTienda {
             System.out.println("\t| 2 - MENU ARTICULOS");
             System.out.println("\t| 3 - MENU CLIENTES");
             System.out.println("\t| 4 - MENU PEDIDOS");
-            System.out.println("\t| 5 - MENU EXAMEN 05/02/2026");
-            System.out.println("\t| 5 - MENU EXAMEN 20/02/2026");
+            System.out.println("\t| 5 - MENU ARCHIVOS");
+            System.out.println("\t| 6 - MENU EXAMEN 05/02/2026");
+            System.out.println("\t| 7 - MENU EXAMEN 20/02/2026");
+            System.out.println("\t| 8 - PRUEBAS");
 
             System.out.print("Teclea el numero: ");
 
@@ -437,10 +447,16 @@ public class PracticaTienda {
                     menuPedidos();
                 }
                 case 5 -> {
-                    menuExamen0502026();
+                    menuArchivos();
                 }
                 case 6 -> {
+                    menuExamen0502026();
+                }
+                case 7 -> {
                     menuExamen2002026();
+                }
+                case 8 -> {
+                    pruebas();
                 }
             }
         } while (opcion != 0);
@@ -712,7 +728,7 @@ public class PracticaTienda {
         } while (opcion != 0);
     }
 
-    private void stock(Articulo a, int unidades) throws StockCero, StockInsuficiente {
+    public void stock(Articulo a, int unidades) throws StockCero, StockInsuficiente {
         if (a.getExistencias() == 0) {
             throw new StockCero("0 unidades disponibles de: "
                     + a.getDescription());
@@ -968,6 +984,66 @@ public class PracticaTienda {
             }
             System.out.println(a + " - " + total);
         }
+
+        System.out.println("Listado de todos los pedidos ordenados por fecha de menor a mayor y almacenados en una lista:");
+        List<Pedido> pedidosOrdenadosFecha
+                = pedidos.stream().sorted(Comparator.comparing(Pedido::getFechaPedido))
+                        .collect(Collectors.toList());
+        System.out.println("Listado de todos los pedidos ordenados por el total de menor a mayor y almacenados en una coleccion TreeMap:");
+        TreeMap<Double, Pedido> pedidosConTotales = new TreeMap();
+        for (Pedido p : pedidos) {
+            pedidosConTotales.put(totalPedido(p), p);
+        }
+        System.out.println("\n");
+        for (Double total : pedidosConTotales.keySet()) {
+            System.out.println(pedidosConTotales.get(total).getIdPedido() + " - " + total);
+        }
+        System.out.println("Listado de todos los pedidos ordenados por el total de mayor a menor y almacenados en una coleccion TreeMap:");
+        TreeMap<Double, Pedido> pedidosConTotales2 = new TreeMap();
+        for (Pedido p : pedidos) {
+            pedidosConTotales2.put(totalPedido(p), p);
+        }
+        System.out.println("\n");
+        for (Double total : pedidosConTotales2.descendingKeySet()) {
+            System.out.println(pedidosConTotales2.get(total).getIdPedido() + " - " + total);
+        }
+        System.out.println("Listado de todos los clientes ordenados por las ventas realizadas de mayor a menor y almacenados en una coleccion TreeMap:");
+        TreeMap<Double, Cliente> ventasPorCliente = new TreeMap();
+        for (Cliente c : clientes.values()) {
+            ventasPorCliente.put(totalCliente2(c), c);
+        }
+        System.out.println("\n");
+        for (Double totalPorCliente : ventasPorCliente.descendingKeySet()) {
+            System.out.println(ventasPorCliente.get(totalPorCliente).getNombre() + " - " + totalPorCliente);
+        }
+        System.out.println(pedidosOrdenadosFecha);
+    }
+
+    public void pruebas() {
+        List<Articulo> perifericos, almacenamiento, impresoras, monitores;
+        perifericos = articulos.values()
+                .stream().filter(a -> a.getArticulo().startsWith("1"))
+                .collect(Collectors.toList());
+
+        almacenamiento = articulos.values()
+                .stream().filter(a -> a.getArticulo().startsWith("2"))
+                .collect(Collectors.toList());
+
+        impresoras = articulos.values()
+                .stream().filter(a -> a.getArticulo().startsWith("3"))
+                .collect(Collectors.toList());
+
+        monitores = articulos.values()
+                .stream().filter(a -> a.getArticulo().startsWith("4"))
+                .collect(Collectors.toList());
+
+        articulos.values()
+                .removeIf(a -> a.getArticulo().startsWith("3"));
+
+        System.out.println(perifericos);
+        System.out.println(almacenamiento);
+        System.out.println(impresoras);
+        System.out.println(monitores);
     }
 
     //Total gastado por un Cliente
@@ -983,37 +1059,254 @@ public class PracticaTienda {
                 * l.getUnidades()).sum();
     }
 
-    /* METODO PARA CALCULAR LAS UNIDADES VENDIDAS DE UN ARTÍCULO
-       EN TODOS LOS PEDIDOS DE LA TIENDA - VERSIÓN CLÁSICA
-     */
-    private int unidadesVendidas1(Articulo a) {
-        int c = 0;
-        for (Pedido p : pedidos) {
-            for (LineaPedido l : p.getCestaCompra()) {
-                if (l.getArticulo().equals(a)) {
-                    c += l.getUnidades();
+    /*
+        METODO PARA CALCULAR LAS UNIDADES VENDIDAS DE UN ARTÍCULO
+        EN TODOS LOS PEDIDOS DE LA TIENDA - VERSIÓN CLÁSICA
+
+        private int unidadesVendidas1(Articulo a) {
+            int c = 0;
+            for (Pedido p : pedidos) {
+                for (LineaPedido l : p.getCestaCompra()) {
+                    if (l.getArticulo().equals(a)) {
+                        c += l.getUnidades();
+                    }
                 }
             }
+            return c;
         }
-        return c;
-    }
-
-    /* VERSIÓN SEMI-CLÁSICA - UTILIZANDO STREAMS SOLO PARA LA cestaCompra de cada Pedido 
      */
-    private int unidadesVendidas2(Articulo a) {
-        int total = 0;
-        for (Pedido p : pedidos) {
-            total += p.getCestaCompra().stream().filter(l -> l.getArticulo().equals(a))
+ /*
+        VERSIÓN SEMI-CLÁSICA - UTILIZANDO STREAMS SOLO PARA LA cestaCompra de cada Pedido
+
+        private int unidadesVendidas2(Articulo a) {
+            int total = 0;
+            for (Pedido p : pedidos) {
+                total += p.getCestaCompra().stream().filter(l -> l.getArticulo().equals(a))
+                        .mapToInt(LineaPedido::getUnidades).sum();
+            }
+            return total;
+        }
+     */
+ /*
+        VERSIÓN PROGRAMACIÓN FUNCIONAL CON flatMap() para aplanar los streams
+
+        private int unidadesVendidas3(Articulo a) {
+            return pedidos.stream().flatMap(p -> p.getCestaCompra().stream())
+                    .filter(l -> l.getArticulo().equals(a))
                     .mapToInt(LineaPedido::getUnidades).sum();
         }
-        return total;
+     */
+    //#endregion
+    //#region Archivos
+    public void menuArchivos() {
+        // secciones distintas a csv
+        // clientes con pedidos y clientes sin pedidos
+        int opcion;
+        do {
+            System.out.println("\t MENU DE ARCHIVOS");
+            System.out.println("\t | 0 - SALIR");
+            System.out.println("\t | 1 - INFORMACION ARCHIVO");
+            System.out.println("\t | 2 - BORRAR ARCHIVO");
+            System.out.println("\t | 3 - CAMBIAR NOMBRE ARCHIVO");
+            System.out.println("\t | 4 - ESCRIBIR ARCHIVO");
+            System.out.println("\t | 5 - LEER ARCHIVO");
+            System.out.println("\t | 6 - GUARDAR CLIENTES");
+            System.out.println("\t | 7 - LEE CLIENTES");
+            System.out.println("\t | 8 - GUARDA ARTICULOS POR SECCION");
+
+            System.out.print("Teclea el numero: ");
+
+            opcion = sc.nextInt();
+            System.out.println();
+
+            switch (opcion) {
+                // MENU DE ARCHIVOS
+                case 1 -> {
+                    infoArchivo();
+                }
+                case 2 -> {
+                    borrarArchivo();
+                }
+                case 3 -> {
+                    cambiarNombreArchivo();
+                }
+                case 4 -> {
+                    escribirArchivo();
+                }
+                case 5 -> {
+                    leerArchivo();
+                }
+                case 6 -> {
+                    guardarClientes();
+                }
+                case 7 -> {
+                    leeClientes();
+                }
+                case 8 -> {
+                    guardaArticulosPorSeccion();
+                }
+            }
+        } while (opcion != 0);
     }
 
-    /* VERSIÓN PROGRAMACIÓN FUNCIONAL CON flatMap() para aplanar los streams */
-    private int unidadesVendidas3(Articulo a) {
-        return pedidos.stream().flatMap(p -> p.getCestaCompra().stream())
-                .filter(l -> l.getArticulo().equals(a))
-                .mapToInt(LineaPedido::getUnidades).sum();
+    public static void infoArchivo() {
+        File f = new File("archivos/archivo1.txt");
+        try {
+            f.createNewFile();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println("Nombre: " + f.getName());
+        System.out.println("Ruta: " + f.getAbsolutePath());
+        System.out.println("Tamano en Bytes: " + f.length());
+        System.out.println("Fecha ultima modificacion: " + new Date(f.lastModified()));
+    }
+
+    public static void borrarArchivo() {
+        System.out.println("Archivo a eliminar: ");
+        String nombre = sc.nextLine();
+        File f = new File(nombre);
+        System.out.println(f.getAbsolutePath());
+        if (f.delete()) {
+            System.out.println("Archivo eliminado");
+        } else {
+            System.out.println("No se ha podido eliminar");
+        }
+    }
+
+    public static void cambiarNombreArchivo() {
+        System.out.println("Nombre del Archivo a renombrar: ");
+        String nombre = sc.nextLine();
+        File f1 = new File(nombre);
+        System.out.println("Nuevo nombre:");
+        String nombre2 = sc.nextLine();
+        File f2 = new File(nombre2);
+        if (f1.renameTo(f2)) {
+            System.out.println("Se ha cambiado el nombre");
+        } else {
+            System.out.println("No se ha podido cambiar el nombre");
+        }
+    }
+
+    public static void escribirArchivo() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("archivos/archivo1.txt", true))) {
+            String cadena;
+            System.out.println("Teclea lineas de texto + RETORNO - (FIN para terminar)");
+            cadena = sc.nextLine();
+            while (!cadena.equalsIgnoreCase("FIN")) {
+                bw.write(cadena); //Escribe la cadena en el BufferedWriter
+                bw.newLine(); //Añade un salto de línea
+                cadena = sc.nextLine(); //Solicita una nueva cadena
+            }
+        } catch (IOException e) {
+            System.out.println("No se ha podido escribir en el fichero");
+        }
+    }
+
+    public static void leerArchivo() {
+        try (BufferedReader br = new BufferedReader(new FileReader("archivos/archivo1.txt"))) {
+            String cadena = br.readLine(); //Lee la primera línea del fichero
+            while (cadena != null) { //Mientras no se llegue al final del archivo
+                System.out.println(cadena); //Se nuestra por pantalla
+                cadena = br.readLine(); //Se lee la siguiente línea del archivo
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void guardarClientes() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("archivos/clientes/clientes.txt", true))) {
+            for (Cliente c : clientes.values()) {
+                bw.write(c.toString());
+                bw.newLine();
+            }
+            System.out.println("clientes.txt actualizado");
+        } catch (IOException e) {
+            System.out.println("No se han podido escribir los clientes en el archivo");
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("archivos/clientes/clientes.csv", true))) {
+            for (Cliente c : clientes.values()) {
+                bw.write(c.getIdCliente() + "," + c.getNombre() + "," + c.getTelefono() + "," + c.getEmail());
+                bw.newLine();
+            }
+            System.out.println("clientes.csv actualizado");
+        } catch (IOException e) {
+            System.out.println("No se han podido escribir los clientes en el archivo");
+        }
+    }
+
+    public void leeClientes() {
+        /*
+        try (Scanner scClientes = new Scanner(new File("archivos/clientes/clientes.csv"))) {
+            while (scClientes.hasNextLine()) {
+                String[] atributos = scClientes.nextLine().split("[,]");
+                Cliente c = new Cliente(atributos[0], atributos[1], atributos[2], atributos[3]);
+                System.out.println(c);
+            }
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
+         */
+        HashMap<String, Cliente> clientesAux = new HashMap();
+        try (Scanner scClientes = new Scanner(new File("archivos/clientes/clientes.csv"))) {
+            while (scClientes.hasNextLine()) {
+                String[] atributos = scClientes.nextLine().split("[,]");
+                Cliente c = new Cliente(atributos[0], atributos[1], atributos[2], atributos[3]);
+                clientesAux.put(atributos[0], c);
+            }
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
+        clientesAux.values().forEach(System.out::println);
+    }
+
+    private void guardaArticulosPorSeccion() {
+        try {
+            BufferedWriter bwPerifericos = new BufferedWriter(new FileWriter("archivos/articulos/1-perifericos.csv", true));
+            BufferedWriter bwAlmacenamiento = new BufferedWriter(new FileWriter("archivos/articulos/2-almacenamiento.csv", true));
+            BufferedWriter bwImpresoras = new BufferedWriter(new FileWriter("archivos/articulos/3-impresoras.csv", true));
+            BufferedWriter bwMonitores = new BufferedWriter(new FileWriter("archivos/articulos/4-monitores.csv", true));
+            {
+                for (Articulo a : articulos.values()) {
+                    switch (a.getArticulo().charAt(0)) {
+                        case '1':
+                            bwPerifericos.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                            break;
+                        case '2':
+                            bwAlmacenamiento.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                            break;
+                        case '3':
+                            bwImpresoras.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                            break;
+                        case '4':
+                            bwMonitores.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                            break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("No se han podido escribir los clientes en el archivo");
+        }
+        /* Mas bonito a la vista, pero recorres todas las secciones y todos los articulos varias veces
+        for (String seccion : nombreSecciones) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter("archivos/articulos/" + seccion + ".csv", true))) {
+                for (Articulo a : articulos.values()) {
+                    if (a.getArticulo().startsWith(seccion.substring(0, 1))) {
+                    bw.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                    bw.newLine(); 
+                    }
+                }
+                System.out.println(seccion + ".csv actualizado");
+            } catch (IOException e) {
+                System.out.println("No se han podido escribir los clientes en el archivo");
+            }
+        }
+        System.out.println();
+         */
     }
     //#endregion
 }

@@ -1,59 +1,73 @@
 # PracticaTienda
 
-**PracticaTienda** es una aplicación de prueba para facilitar la gestión de inventario, clientes y pedidos en una tienda virtual.
+**PracticaTienda** es una aplicación de prueba por consola para facilitar la gestión de inventario, clientes y pedidos en una tienda virtual.
 *Adrián Cuervo Rodríguez, 1 DAW*
 
 ---
 
-## Tecnicas
+## Técnicas Usadas
 
-**ArrayLists**
-
-**HasMaps**
-
-**Uso de la programación funcional:**
-
-- *Streams*
-- *Filtros de ordenación*
-
-**jUnit Tests**
+- **Colecciones de Java:** Uso de `ArrayList` y `HashMap` para la gestión de datos en memoria.
+- **Programación Funcional (API Stream):**
+  - Operaciones de filtrado, mapeo y recolección (`filter`, `map`, `collect`).
+  - Ordenación de colecciones con `sorted` y `Comparator`.
+  - Agrupación y cálculos agregados (`groupingBy`, `summingInt`, `counting`, `average`).
+  - Aplanamiento de colecciones anidadas con `flatMap`.
+- **Manejo de Ficheros:**
+  - Lectura y escritura de ficheros de texto (`BufferedReader`, `BufferedWriter`).
+  - Operaciones con el sistema de archivos (`File`).
+  - Exportación de datos a formato CSV.
+- **Excepciones Personalizadas:** Creación y uso de excepciones (`StockCero`, `StockInsuficiente`) para un control de errores más específico.
+- **Validaciones:** Uso de expresiones regulares para la validación de datos como el DNI.
+- **jUnit Tests:** Pruebas unitarias para garantizar el funcionamiento de los métodos.
 
 ---
 
 ## Características
 
-**Listados de todos los datos:**
+### Gestión de Datos
+- **Artículos:** Alta, baja, reposición de stock y listados por sección.
+- **Clientes:** Alta, baja y modificación de datos. Se valida el DNI en el alta.
+- **Pedidos:** Creación de nuevos pedidos, con cálculo de total y generación de ID único por cliente y año.
 
-- *Clientes*
-- *Articulos*
-- *Pedidos*
-- *Streams*
+### Control de Stock
+- **Comprobación de Stock:** El sistema comprueba la disponibilidad de artículos al realizar un pedido.
+  - **`StockCero`:** Impide añadir artículos sin existencias.
+  - **`StockInsuficiente`:** Gestiona los casos donde la demanda supera las existencias, permitiendo al usuario comprar el stock restante.
 
-**Alta cliente**
+### Consultas e Informes (Streams)
+- **Listados Generales:** Visualización de todos los artículos, clientes y pedidos.
+- **Consultas sobre Artículos:**
+  - Listar artículos por sección.
+  - Listar artículos no vendidos.
+  - Listar artículos ordenados de distintas formas.
+- **Consultas sobre Clientes:**
+  - Identificar clientes que no han realizado pedidos.
+  - Listar clientes ordenados de distintas formas.
+- **Consultas sobre Pedidos:**
+  - Calcular el importe medio de todos los pedidos.
+  - Calcular la facturación total en un período de tiempo (últimos 5 días).
+  - Listar los pedidos de un cliente específico.
 
-- *Valida su DNI*
-
-**Nuevo articulo**
-**Realizar pedido**
-
-- *Genera ID de pedido*
-- *Calcula precio*
-
-**Comprobar stock**
-
-- *Cero*
-- *Insuficiente*
+### Gestión de Ficheros
+- **Información de archivos:** Obtener detalles como nombre, ruta y tamaño.
+- **Operaciones básicas:** Borrar y renombrar archivos.
+- **Persistencia de datos:**
+  - Guardar el listado de clientes en un fichero `clientes.csv`.
+  - Escribir y leer texto en ficheros genéricos.
 
 ---
 
 ## Tests
 
-**MetodosAux:**
+**MetodosAuxTest.java**
+- `testEsInt()`
+- `testEsDouble()`
+- `testValidarDNI()`
 
-- *esInt*
-- *esDouble*
-- *validarDNI*
-
-**PracticaTienda:**
-
-- *totalPedido*
+**PracticaTiendaTest.java**
+- `testCargaDatos()`
+- `testTotalPedido()`
+- `testTotalCliente2()`
+- `testGeneraIdPedido()`
+- `testStock()`

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,8 +45,8 @@ public class PracticaTiendaTest {
     public void testCargaDatos() {
         assertAll(
                 () -> assertEquals(10, t.getArticulos().size()),
-                () -> assertEquals(4, t.getClientes().size()),
-                () -> assertEquals(5, t.getPedidos().size())
+                () -> assertEquals(4,  t.getClientes().size()),
+                () -> assertEquals(5,  t.getPedidos().size())
         );
     }
 
@@ -55,9 +56,9 @@ public class PracticaTiendaTest {
     @Test
     public void testTotalPedido() {
         assertAll(
-                () -> assertEquals(585, t.totalPedido(t.getPedidos().get(0))),
+                () -> assertEquals(585,  t.totalPedido(t.getPedidos().get(0))),
                 () -> assertEquals(2980, t.totalPedido(t.getPedidos().get(1))),
-                () -> assertEquals(390, t.totalPedido(t.getPedidos().get(2))),
+                () -> assertEquals(390,  t.totalPedido(t.getPedidos().get(2))),
                 () -> assertEquals(1980, t.totalPedido(t.getPedidos().get(3))),
                 () -> assertEquals(2160, t.totalPedido(t.getPedidos().get(4)))
         );
@@ -72,7 +73,7 @@ public class PracticaTiendaTest {
                 () -> assertEquals(3565, t.totalCliente2(t.getClientes().get("80580845T"))),
                 () -> assertEquals(2370, t.totalCliente2(t.getClientes().get("36347775R"))),
                 () -> assertEquals(2160, t.totalCliente2(t.getClientes().get("63921307Y"))),
-                () -> assertEquals(0, t.totalCliente2(t.getClientes().get("02337565Y")))
+                () -> assertEquals(0,    t.totalCliente2(t.getClientes().get("02337565Y")))
         );
     }
 
@@ -89,4 +90,16 @@ public class PracticaTiendaTest {
         );
     }
 
+    /**
+     * Test of Stock method, of class PracticaTienda.
+     */
+    @Test
+    public void testStock() {
+        assertAll(
+            () -> assertThrows(StockCero.class, () ->         {t.stock(t.getArticulos().get("1-11"),5);}),
+            () -> assertThrows(StockCero.class, () ->         {t.stock(t.getArticulos().get("2-33"),1);}),
+            () -> assertThrows(StockInsuficiente.class, () -> {t.stock(t.getArticulos().get("3-11"),5);}),
+            () -> assertThrows(StockInsuficiente.class, () -> {t.stock(t.getArticulos().get("3-22"),10);})
+        );
+    }
 }

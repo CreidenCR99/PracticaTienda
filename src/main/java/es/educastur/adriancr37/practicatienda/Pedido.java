@@ -59,8 +59,8 @@ public class Pedido {
     public String toString() {
         return String.format("""
         
-        \tPEDIDO
-        ───────────────────────
+        \t\tPEDIDO
+        ──────────────────────────────────────────────
         ID:       %s
         Cliente:  %s
         Fecha:    %s
