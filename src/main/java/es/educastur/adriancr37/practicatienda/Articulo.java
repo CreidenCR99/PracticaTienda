@@ -1,6 +1,8 @@
 package es.educastur.adriancr37.practicatienda;
 
-public class Articulo {
+import java.io.Serializable;
+
+public class Articulo implements Serializable {
 
     private String idArticulo;
     private String description;

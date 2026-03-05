@@ -1,6 +1,8 @@
 package es.educastur.adriancr37.practicatienda;
 
-public class LineaPedido {
+import java.io.Serializable;
+
+public class LineaPedido implements Serializable {
 
     private Articulo articulo;
     private int unidades;

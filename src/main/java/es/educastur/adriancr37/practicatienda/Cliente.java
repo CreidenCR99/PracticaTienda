@@ -1,6 +1,8 @@
 package es.educastur.adriancr37.practicatienda;
 
-public class Cliente {
+import java.io.Serializable;
+
+public class Cliente implements Serializable {
 
     private String idCliente;
     private String nombre;

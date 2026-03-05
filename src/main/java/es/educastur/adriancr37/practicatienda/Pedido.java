@@ -1,9 +1,10 @@
 package es.educastur.adriancr37.practicatienda;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Pedido {
+public class Pedido implements Serializable {
 
     private String idPedido;
     private Cliente clientePedido;
@@ -54,7 +55,6 @@ public class Pedido {
         return "Pedido [idPedido=" + idPedido + ", clientePedido=" + clientePedido + ", fechaPedido=" + fechaPedido
                 + ", cestaCompra=" + cestaCompra + "]";
     }*/
-
     @Override
     public String toString() {
         return String.format("""
