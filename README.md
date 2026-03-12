@@ -52,6 +52,7 @@
 ### Gestión de Ficheros
 - **Información de archivos:** Obtener detalles como nombre, ruta y tamaño.
 - **Operaciones básicas:** Borrar y renombrar archivos.
+- **Copias de seguridad:** Copias independientes de secciones y colecciones y una copia de toda la tienda.
 - **Persistencia de datos:**
   - Guardar el listado de clientes en un fichero `clientes.csv`.
   - Escribir y leer texto en ficheros genéricos.
