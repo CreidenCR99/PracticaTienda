@@ -5,31 +5,31 @@ import java.io.Serializable;
 public class Articulo implements Serializable {
 
     private String idArticulo;
-    private String description;
+    private String descripcion;
     private int existencias;
     private double pvp;
 
-    public Articulo(String idArticulo, String description, int existencias, double pvp) {
+    public Articulo(String idArticulo, String descripcion, int existencias, double pvp) {
         this.idArticulo = idArticulo;
-        this.description = description;
+        this.descripcion = descripcion;
         this.existencias = existencias;
         this.pvp = pvp;
     }
 
-    public String getArticulo() {
+    public String getIdArticulo() {
         return idArticulo;
     }
 
-    public void setArticulo(String idArticulo) {
+    public void setIdArticulo(String idArticulo) {
         this.idArticulo = idArticulo;
     }
 
-    public String getDescription() {
-        return description;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setdescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public int getExistencias() {
@@ -50,7 +50,7 @@ public class Articulo implements Serializable {
 
     /*@Override
     public String toString() {
-        return "Articulo [idArticulo=" + idArticulo + ", description=" + description + ", existencias=" + existencias
+        return "Articulo [idArticulo=" + idArticulo + ", descripcion=" + descripcion + ", existencias=" + existencias
                 + ", pvp=" + pvp + "]";
     }*/
     @Override
@@ -64,7 +64,7 @@ public class Articulo implements Serializable {
         Stock:       %d unidades
         Precio:      %.2f
         """,
-                idArticulo, description, existencias, pvp
+                idArticulo, descripcion, existencias, pvp
         );
     }
 

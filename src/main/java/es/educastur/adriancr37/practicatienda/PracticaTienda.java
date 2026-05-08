@@ -13,6 +13,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,8 +27,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -49,11 +51,11 @@ public class PracticaTienda implements Serializable {
         this.pedidos = pedidos;
     }
 
-    public HashMap<String, Articulo> getArticulos() {
+    public HashMap<String, Articulo> getIdArticulos() {
         return articulos;
     }
 
-    public void setArticulos(HashMap<String, Articulo> articulos) {
+    public void setIdArticulos(HashMap<String, Articulo> articulos) {
         this.articulos = articulos;
     }
 
@@ -80,8 +82,14 @@ public class PracticaTienda implements Serializable {
 
     public static void main(String[] args) {
         PracticaTienda t = new PracticaTienda();
-        //t.cargaDatos();
-        PracticaTienda tImportada = t.importarTiendaCompleta();
+        t.cargaDatos();
+        t.jdbcLeeArticulos();
+        t.jdbcLeeClientes();
+        t.jdbcGuardaArticulos();
+        t.jdbcGuardaClientes();
+        t.menuOpciones();
+
+        /*PracticaTienda tImportada = t.importarTiendaCompleta();
         if (tImportada != null) {
             t = tImportada;
         }
@@ -90,11 +98,122 @@ public class PracticaTienda implements Serializable {
         t.backupTiendaCompleta(t);
         t.backupColecciones();
         t.backupArticulosPorSeccion();
-        System.out.println("\n-\tFin del programa");
+        System.out.println("\n-\tFin del programa");*/
     }
 
+    private void jdbcLeeArticulos() {
+        Statement sentencia;
+        ArrayList<Articulo> articulosAux = new ArrayList();
+        /*LEER ARTICULOS DESDE LA BD */
+
+        String consultaSQL = "SELECT * FROM articulos";
+        try {
+            /* Usando la clase Conexion SE CREA UN OBJETO DE TIPO Statement sobre el que se van 
+               a lanzar consultas SQL.
+               Despues se lanza la consulta SQL a traves del Statement y se recogen los registros
+               en un ResultSet (Conjunto de registros resultado de una consulta SQL)
+             */
+            sentencia = Conexion.obtener().createStatement();
+            ResultSet rs = sentencia.executeQuery(consultaSQL);
+            while (rs.next()) {
+                articulosAux.add(new Articulo(rs.getString(1), rs.getString(2), rs.getInt(3), rs.getDouble(4)));
+            }
+            System.out.println("ARTICULOS importados desde MySQL correctamente");
+        } catch (ClassNotFoundException | SQLException e) {
+            System.out.println(e.toString());
+        }
+
+        articulosAux.stream().forEach(System.out::println);
+    }
+
+    private void jdbcGuardaArticulos() {
+        String consulta;
+
+        for (Articulo a : articulos.values()) {
+            consulta = "INSERT INTO `articulos` (`idArticulo`, `descripcion`, `existencias`, `pvp`)"
+                    + " VALUES ('" + a.getIdArticulo() + "', '" + a.getDescripcion() + "', '" + a.getExistencias() + "', '" + a.getPvp() + "')";
+            try {
+                PreparedStatement ps = Conexion.obtener().prepareStatement(consulta);
+                ps.executeUpdate();
+            } catch (ClassNotFoundException | SQLException e) {
+                System.out.println(e.toString());
+            }
+        }
+        System.out.println("ARTICULOS exportados a MySQL correctamente");
+    }
+
+    private void jdbcLeeClientes() {
+        Statement sentencia;
+        ArrayList<Cliente> clientesAux = new ArrayList();
+
+        String consultaSQL = "SELECT * FROM clientes";
+        try {
+            sentencia = Conexion.obtener().createStatement();
+            ResultSet rs = sentencia.executeQuery(consultaSQL);
+            while (rs.next()) {
+                clientesAux.add(new Cliente(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4)));
+            }
+            System.out.println("CLIENTES importados desde MySQL correctamente");
+        } catch (ClassNotFoundException | SQLException e) {
+            System.out.println(e.toString());
+        }
+
+        clientesAux.stream().forEach(System.out::println);
+    }
+
+    private void jdbcGuardaClientes() {
+        String consulta;
+
+        for (Cliente c : clientes.values()) {
+            consulta = "INSERT INTO `clientes` (`idCliente`, `nombre`, `telefono`, `email`)"
+                    + " VALUES ('" + c.getIdCliente() + "', '" + c.getNombre() + "', '" + c.getTelefono() + "', '" + c.getEmail() + "')";
+            try {
+                PreparedStatement ps = Conexion.obtener().prepareStatement(consulta);
+                ps.executeUpdate();
+            } catch (ClassNotFoundException | SQLException e) {
+                System.out.println(e.toString());
+            }
+        }
+        System.out.println("CLIENTES exportados a MySQL correctamente");
+    }
+/*
+    private void jdbcLeePedidos() {
+        Statement sentencia;
+        ArrayList<Pedido> pedidosAux = new ArrayList();
+
+        String consultaSQL = "SELECT * FROM pedidos";
+        try {
+            sentencia = Conexion.obtener().createStatement();
+            ResultSet rs = sentencia.executeQuery(consultaSQL);
+            while (rs.next()) {
+                pedidosAux.add(new Pedido(rs.getString(1), rs.getString(2), (rs.getDate(3)).toLocalDate(), (ArrayList<LineaPedido>) rs.getObject(4)));
+            }
+            System.out.println("PEDIDOS importados desde MySQL correctamente");
+        } catch (ClassNotFoundException | SQLException e) {
+            System.out.println(e.toString());
+        }
+
+        pedidosAux.stream().forEach(System.out::println);
+    }
+
+    private void jdbcGuardaPedidos() {
+        String consulta;
+
+        for (Pedido p : pedidos) {
+            consulta = "INSERT INTO `pedidos` (`idPedido`, `idCliente`, `fecha`)"
+                    + " VALUES ('" + p.getIdPedido() + "', '" + p.getClientePedido().getIdCliente() + "', '" + p.getFechaPedido() + "')";
+            try {
+                PreparedStatement ps = Conexion.obtener().prepareStatement(consulta);
+                ps.executeUpdate();
+            } catch (ClassNotFoundException | SQLException e) {
+                System.out.println(e.toString());
+            }
+        }
+        System.out.println("PEDIDOS exportados a MySQL correctamente");
+    }*/
+
     //#region Backup
-    public void cargaDatos() {
+    /*public void cargaDatos() {
         clientes.put("80580845T", new Cliente("80580845T", "ANA", "658111111", "ana@gmail.com"));
         clientes.put("36347775R", new Cliente("36347775R", "LOLA", "649222222", "lola@gmail.com"));
         clientes.put("63921307Y", new Cliente("63921307Y", "JUAN", "652333333", "juan@gmail.com"));
@@ -116,9 +235,34 @@ public class PracticaTienda implements Serializable {
         pedidos.add(new Pedido("36347775R-001/2025", clientes.get("36347775R"), hoy.minusDays(3), new ArrayList<>(List.of(new LineaPedido(articulos.get("4-22"), 1), new LineaPedido(articulos.get("2-22"), 3)))));
         pedidos.add(new Pedido("36347775R-002/2025", clientes.get("36347775R"), hoy.minusDays(5), new ArrayList<>(List.of(new LineaPedido(articulos.get("4-33"), 3), new LineaPedido(articulos.get("2-11"), 3)))));
         pedidos.add(new Pedido("63921307Y-001/2025", clientes.get("63921307Y"), hoy.minusDays(4), new ArrayList<>(List.of(new LineaPedido(articulos.get("2-11"), 5), new LineaPedido(articulos.get("2-33"), 3), new LineaPedido(articulos.get("4-33"), 2)))));
+    }*/
+    public void cargaDatos() {
+
+        clientes.put("36347775R", new Cliente("36347775R", "LOLA", "649222222", "lola@gmail.com"));
+        clientes.put("63921307Y", new Cliente("63921307Y", "JUAN", "652333333", "juan@gmail.com"));
+        clientes.put("80580845T", new Cliente("80580845T", "ANA", "658111111", "ana@gmail.com"));
+        clientes.put("02337565Y", new Cliente("02337565Y", "EDU", "634567890", "edu@gmail.com"));
+
+        articulos.put("1-11", new Articulo("1-11", "RATON LOGITECH ST ", 0, 15));
+        articulos.put("1-22", new Articulo("1-22", "TECLADO STANDARD  ", 5, 18));
+        articulos.put("2-11", new Articulo("2-11", "HDD SEAGATE 1 TB  ", 15, 80));
+        articulos.put("2-22", new Articulo("2-22", "SSD KINGSTOM 256GB", 9, 70));
+        articulos.put("2-33", new Articulo("2-33", "SSD KINGSTOM 512GB", 0, 200));
+        articulos.put("3-11", new Articulo("3-11", "HP LASERJET HP800 ", 2, 200));
+        articulos.put("3-22", new Articulo("3-22", "EPSON PRINT XP300 ", 5, 80));
+        articulos.put("4-11", new Articulo("4-11", "ASUS  MONITOR  22 ", 5, 100));
+        articulos.put("4-22", new Articulo("4-22", "HP MONITOR LED 28 ", 5, 180));
+        articulos.put("4-33", new Articulo("4-33", "SAMSUNG ODISSEY G5", 12, 580));
+
+        pedidos.add(new Pedido("80580845T-001/2026", clientes.get("80580845T"), LocalDate.parse("2026-01-05"), new ArrayList<>(List.of(new LineaPedido(articulos.get("1-11"), 3), new LineaPedido(articulos.get("4-22"), 3)))));
+        pedidos.add(new Pedido("80580845T-002/2026", clientes.get("80580845T"), LocalDate.parse("2026-01-10"), new ArrayList<>(List.of(new LineaPedido(articulos.get("4-11"), 3), new LineaPedido(articulos.get("4-22"), 2), new LineaPedido(articulos.get("4-33"), 4)))));
+        pedidos.add(new Pedido("80580845T-003/2026", clientes.get("80580845T"), LocalDate.parse("2026-01-15"), new ArrayList<>(List.of(new LineaPedido(articulos.get("2-11"), 1), new LineaPedido(articulos.get("3-22"), 2)))));
+        pedidos.add(new Pedido("36347775R-001/2026", clientes.get("36347775R"), LocalDate.parse("2026-02-05"), new ArrayList<>(List.of(new LineaPedido(articulos.get("4-22"), 1), new LineaPedido(articulos.get("2-22"), 3)))));
+        pedidos.add(new Pedido("36347775R-002/2026", clientes.get("36347775R"), LocalDate.parse("2026-02-10"), new ArrayList<>(List.of(new LineaPedido(articulos.get("4-33"), 3), new LineaPedido(articulos.get("2-11"), 3)))));
+        pedidos.add(new Pedido("63921307Y-001/2026", clientes.get("63921307Y"), LocalDate.parse("2026-03-05"), new ArrayList<>(List.of(new LineaPedido(articulos.get("2-11"), 5), new LineaPedido(articulos.get("2-33"), 3), new LineaPedido(articulos.get("4-33"), 2)))));
     }
 
-    private PracticaTienda importarTiendaCompleta() {
+    /*private PracticaTienda importarTiendaCompleta() {
         PracticaTienda t = null;
         try (ObjectInputStream oisPracticaTienda = new ObjectInputStream(new FileInputStream("archivos/PracticaTienda.dat"))) {
             t = (PracticaTienda) oisPracticaTienda.readObject();
@@ -131,8 +275,7 @@ public class PracticaTienda implements Serializable {
             Logger.getLogger(PracticaTienda.class.getName()).log(Level.SEVERE, null, ex);
         }
         return t;
-    }
-
+    }*/
     private void backupTiendaCompleta(PracticaTienda t) {
         try (ObjectOutputStream oosPracticaTienda = new ObjectOutputStream(new FileOutputStream("archivos/PracticaTienda.dat"))) {
             oosPracticaTienda.writeObject(t);
@@ -178,7 +321,7 @@ public class PracticaTienda implements Serializable {
         try (ObjectInputStream oisArticulos = new ObjectInputStream(new FileInputStream("archivos/articulos/articulos.dat"))) {
             Articulo a;
             while ((a = (Articulo) oisArticulos.readObject()) != null) {
-                articulos.put(a.getArticulo(), a);
+                articulos.put(a.getIdArticulo(), a);
             }
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());
@@ -222,7 +365,7 @@ public class PracticaTienda implements Serializable {
         List<Articulo> monitores = new ArrayList<>();
 
         for (Articulo a : articulos.values()) {
-            switch (a.getArticulo().charAt(0)) {
+            switch (a.getIdArticulo().charAt(0)) {
                 case '1' ->
                     perifericos.add(a);
                 case '2' ->
@@ -287,11 +430,11 @@ public class PracticaTienda implements Serializable {
                                
                                \tMENU DE OPCIONES DEL EXAMEN
                                \t| 0 - SALIR
-                               \t| 1 - 
-                               \t| 2 - 
-                               \t| 3 - 
-                               \t| 4 - 
-                               \t| 5 - 
+                               \t| 1 - Crear clientesOrdenados.txt
+                               \t| 2 - Crear pedidoMes2026.dat
+                               \t| 3 - Leer pedidoMes2026.dat
+                               \t| 4 - Crear pedido_nombreCliente.txt
+                               \t| 5 - Leer pedido_nombreCliente.txt y calcular
                                """);
 
             System.out.print("Teclea el numero: ");
@@ -320,29 +463,129 @@ public class PracticaTienda implements Serializable {
         } while (opcion != 0);
     }
 
-    // Ejercicio 1 -
+    // Ejercicio 1 - Crear clientesOrdenados.txt
     public void examenUno() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("clientesOrdenados.txt", true))) {
+            clientes.values().stream()
+                    .sorted(Comparator.comparing(Cliente::getNombre))
+                    .forEach(c -> {
+                        try {
+                            bw.write(c.toString());
+                            bw.newLine();
+                        } catch (IOException ex) {
+                            System.out.println("No se ha podido escribir al cliente" + ex.getMessage());
+                        }
+                    });
+        } catch (IOException ex) {
+            System.out.println("No se han podido escribir los clientes en el archivo" + ex.getMessage());
+        }
 
+        System.out.println("clientesOrdenados.txt creado");
     }
 
-    // Ejercicio 2 -
+    // Ejercicio 2 - Crear pedidoMes2026.dat
     public void examenDos() {
+        ArrayList pedidosEnero = new ArrayList<>();
+        ArrayList pedidosFebrero = new ArrayList<>();
+        ArrayList pedidosMarzo = new ArrayList<>();
 
+        for (Pedido p : pedidos) {
+            int mes = p.getFechaPedido().getMonthValue();
+            switch (mes) {
+                case 1 -> {
+                    pedidosEnero.add(p);
+                }
+                case 2 -> {
+                    pedidosFebrero.add(p);
+                }
+                case 3 -> {
+                    pedidosMarzo.add(p);
+                }
+            }
+        }
+
+        try (ObjectOutputStream oosEnero = new ObjectOutputStream(new FileOutputStream("pedidoEnero2026.dat")); // Comnetario 1
+                 ObjectOutputStream oosFebrero = new ObjectOutputStream(new FileOutputStream("pedidoFebrero2026.dat")); // Comentario 2
+                 ObjectOutputStream oosMarzo = new ObjectOutputStream(new FileOutputStream("pedidoMarzo2026.dat"))) {
+
+            oosEnero.writeObject(pedidosEnero);
+            oosFebrero.writeObject(pedidosFebrero);
+            oosMarzo.writeObject(pedidosMarzo);
+
+            System.out.println("Archivos guardados correctamente");
+
+        } catch (IOException ex) {
+            System.out.println("No se han podido crear los archivos correctamente, revise unidades de almacenamiento e intentelo de nuevo" + ex.getMessage());
+            File f = new File("pedidoEnero2026.dat");
+            f.delete();
+            f = new File("pedidoFebrero2026.dat");
+            f.delete();
+            f = new File("pedidoMarzo2026.dat");
+            f.delete();
+        }
     }
 
-    // Ejercicio 3 -
+    // Ejercicio 3 - Leer pedidoMes2026.dat
     public void examenTres() {
+        ArrayList pedidosMes = new ArrayList<>();
+        String[] archivos = {"pedidoEnero2026.dat", "pedidoFebrero2026.dat", "pedidoMarzo2026.dat"};
+        for (String archivo : archivos) {
+            try (ObjectInputStream oisMes = new ObjectInputStream(new FileInputStream(archivo))) {
+                ArrayList<Pedido> mes = (ArrayList<Pedido>) oisMes.readObject();
+                pedidosMes.addAll(mes);
 
+                System.out.println("\n\t" + archivo + "\n" + pedidosMes);
+
+            } catch (Exception ex) {
+                System.out.println("No se han podido leer el archivo" + archivo + ex.getMessage());
+            }
+        }
     }
 
-    // Ejercicio 4 -
+    // Ejercicio 4 - Crear pedido_nombreCliente.txt
     public void examenCuatro() {
+        for (Cliente c : clientes.values()) {
+            List<Pedido> pedidosClientes
+                    = pedidos.stream()
+                            .filter(p -> p.getClientePedido().equals(c))
+                            .collect(Collectors.toList());
 
+            if (!pedidosClientes.isEmpty()) {
+
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter("pedidos_" + c.getNombre().trim().toLowerCase() + ".txt", true))) {
+                    for (Pedido p : pedidosClientes) {
+                        bw.write(p.toString());
+                        bw.newLine();
+                    }
+                    System.out.println("Se han escrito todos los archivos correctamente");
+                } catch (IOException ex) {
+                    System.out.println("No se han podido escribir los archivos correctamente" + ex.getMessage());
+                }
+            }
+        }
     }
 
-    // Ejercicio 5 -
+    // Ejercicio 5 - Leer pedido_nombreCliente.txt y calcular
     public void examenCinco() {
+        sc.nextLine();
+        System.out.print("Introduce el nombre del cliente: ");
+        String nombreCliente = sc.nextLine().trim().toLowerCase();
+        double totalGastado = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader("pedidos_" + nombreCliente + ".txt"))) {
+            String linea;
+            System.out.println("Los pedidos en pedidos_" + nombreCliente + ".txt son:");
+            while ((linea = br.readLine()) != null) {
+                System.out.println(linea);
+                String[] columnas = linea.split(",");
+                if (columnas.length >= 3) {
+                    totalGastado += Double.parseDouble(columnas[2]);
+                }
+            }
+            System.out.println("El total gastado por " + nombreCliente.toUpperCase() + " desde el archivo es de: " + totalGastado);
 
+        } catch (IOException ex) {
+            System.out.println("No se han podido leer los archivos correctamente" + ex.getMessage());
+        }
     }
     //#endregion
 
@@ -417,7 +660,7 @@ public class PracticaTienda implements Serializable {
             System.out.println("\nListados de articulos de la seccion: " + nombreSeccion);
 
             articulos.values().stream()
-                    .filter(a -> a.getArticulo().startsWith(strSeccion) && a.getExistencias() > 0)
+                    .filter(a -> a.getIdArticulo().startsWith(strSeccion) && a.getExistencias() > 0)
                     // .filter(a -> a.getExistencias() > 0)
                     .sorted(Comparator.comparing(Articulo::getPvp).reversed())
                     .forEach(a -> System.out.println(a + "Unidades:\t" + a.getExistencias()));
@@ -520,7 +763,7 @@ public class PracticaTienda implements Serializable {
             System.out.println("\nListados de articulos de la seccion: " + nombreSeccion);
 
             articulosAux.stream()
-                    .filter(a -> a.getArticulo().startsWith(strSeccion))
+                    .filter(a -> a.getIdArticulo().startsWith(strSeccion))
                     .forEach(System.out::println);
         } else {
             System.out.println("La seccion seleccionada no existe.");
@@ -534,25 +777,25 @@ public class PracticaTienda implements Serializable {
         System.out.println("\nListados de articulos de la seccion: " + nombreSecciones[0]);
 
         articulosAux.stream()
-                .filter(a -> a.getArticulo().startsWith("1"))
+                .filter(a -> a.getIdArticulo().startsWith("1"))
                 .forEach(System.out::println);
 
         System.out.println("\nListados de articulos de la seccion: " + nombreSecciones[1]);
 
         articulosAux.stream()
-                .filter(a -> a.getArticulo().startsWith("2"))
+                .filter(a -> a.getIdArticulo().startsWith("2"))
                 .forEach(System.out::println);
 
         System.out.println("\nListados de articulos de la seccion: " + nombreSecciones[2]);
 
         articulosAux.stream()
-                .filter(a -> a.getArticulo().startsWith("3"))
+                .filter(a -> a.getIdArticulo().startsWith("3"))
                 .forEach(System.out::println);
 
         System.out.println("\nListados de articulos de la seccion: " + nombreSecciones[3]);
 
         articulosAux.stream()
-                .filter(a -> a.getArticulo().startsWith("4"))
+                .filter(a -> a.getIdArticulo().startsWith("4"))
                 .forEach(System.out::println);
 
     }
@@ -587,7 +830,7 @@ public class PracticaTienda implements Serializable {
         System.out.println("\nListado de articulos y unidades vendidas");
         articulosAux.stream()
                 .sorted(Comparator.comparing(a -> totalVendido((Articulo) a)).reversed())
-                .forEach(a -> System.out.println(a.getDescription() + "\tTotal vendido: " + totalVendido(a))
+                .forEach(a -> System.out.println(a.getDescripcion() + "\tTotal vendido: " + totalVendido(a))
                 );
     }
 
@@ -1084,11 +1327,11 @@ public class PracticaTienda implements Serializable {
     public void stock(Articulo a, int unidades) throws StockCero, StockInsuficiente {
         if (a.getExistencias() == 0) {
             throw new StockCero("0 unidades disponibles de: "
-                    + a.getDescription());
+                    + a.getDescripcion());
         }
         if (a.getExistencias() < unidades) {
             throw new StockInsuficiente("\nSolo hay " + a.getExistencias()
-                    + " unidades disponibles de: " + a.getDescription());
+                    + " unidades disponibles de: " + a.getDescripcion());
         }
     }
 
@@ -1145,21 +1388,21 @@ public class PracticaTienda implements Serializable {
         }
         if (!cestaCompra.isEmpty()) {
             System.out.println("Este es tu pedido: ");
-            for (LineaPedido l : cestaCompra) {
-                System.out.println(l.getArticulo() + "\t- "
-                        + l.getArticulo().getDescription() + "\t- "
-                        + l.getUnidades() + "\t- "
-                        + l.getArticulo().getPvp() + "\t- "
-                        + l.getArticulo().getPvp() * l.getUnidades());
+            for (LineaPedido lp : cestaCompra) {
+                System.out.println(lp.getArticulo() + "\t- "
+                        + lp.getArticulo().getDescripcion() + "\t- "
+                        + lp.getUnidades() + "\t- "
+                        + lp.getArticulo().getPvp() + "\t- "
+                        + lp.getArticulo().getPvp() * lp.getUnidades());
             }
             System.out.print("Procedemos con la compra (Si/No): ");
             String respuesta = sc.nextLine();
             if (respuesta.equalsIgnoreCase("si")) {
                 String idPedido = generaIdPedido(idCliente);
                 pedidos.add(new Pedido(idPedido, clientes.get(idCliente), hoy, cestaCompra));
-                for (LineaPedido l : cestaCompra) {
-                    l.getArticulo().setExistencias(
-                            l.getArticulo().getExistencias() - l.getUnidades());
+                for (LineaPedido lp : cestaCompra) {
+                    lp.getArticulo().setExistencias(
+                            lp.getArticulo().getExistencias() - lp.getUnidades());
                 }
                 System.out.println("Pedido realizado correctamente.");
             }
@@ -1168,8 +1411,8 @@ public class PracticaTienda implements Serializable {
 
     public double totalPedido(Pedido p) {
         double totalPedido = 0;
-        for (LineaPedido l : p.getCestaCompra()) {
-            totalPedido += l.getUnidades() * l.getArticulo().getPvp();
+        for (LineaPedido lp : p.getCestaCompra()) {
+            totalPedido += lp.getUnidades() * lp.getArticulo().getPvp();
         }
         return totalPedido;
     }
@@ -1177,9 +1420,9 @@ public class PracticaTienda implements Serializable {
     public int totalVendido(Articulo a) {
         int totalVendido = 0;
         for (Pedido p : pedidos) {
-            for (LineaPedido l : p.getCestaCompra()) {
-                if (a.getArticulo().equals(l.getArticulo().getArticulo())) {
-                    totalVendido += l.getUnidades();
+            for (LineaPedido lp : p.getCestaCompra()) {
+                if (a.getIdArticulo().equals(lp.getArticulo().getIdArticulo())) {
+                    totalVendido += lp.getUnidades();
                 }
             }
         }
@@ -1394,21 +1637,21 @@ public class PracticaTienda implements Serializable {
                  BufferedWriter bwMonitores = new BufferedWriter(new FileWriter("archivos/articulos/4-monitores.csv", true))) {
 
             for (Articulo a : articulos.values()) {
-                switch (a.getArticulo().charAt(0)) {
+                switch (a.getIdArticulo().charAt(0)) {
                     case '1' -> {
-                        bwPerifericos.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                        bwPerifericos.write(a.getIdArticulo() + "," + a.getDescripcion() + "," + a.getExistencias() + "," + a.getPvp());
                         bwPerifericos.newLine();
                     }
                     case '2' -> {
-                        bwAlmacenamiento.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                        bwAlmacenamiento.write(a.getIdArticulo() + "," + a.getDescripcion() + "," + a.getExistencias() + "," + a.getPvp());
                         bwAlmacenamiento.newLine();
                     }
                     case '3' -> {
-                        bwImpresoras.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                        bwImpresoras.write(a.getIdArticulo() + "," + a.getDescripcion() + "," + a.getExistencias() + "," + a.getPvp());
                         bwImpresoras.newLine();
                     }
                     case '4' -> {
-                        bwMonitores.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                        bwMonitores.write(a.getIdArticulo() + "," + a.getDescripcion() + "," + a.getExistencias() + "," + a.getPvp());
                         bwMonitores.newLine();
                     }
                 }
@@ -1421,8 +1664,8 @@ public class PracticaTienda implements Serializable {
         for (String seccion : nombreSecciones) {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter("archivos/articulos/" + seccion + ".csv", true))) {
                 for (Articulo a : articulos.values()) {
-                    if (a.getArticulo().startsWith(seccion.substring(0, 1))) {
-                    bw.write(a.getArticulo() + "," + a.getDescription() + "," + a.getExistencias() + "," + a.getPvp());
+                    if (a.getIdArticulo().startsWith(seccion.substring(0, 1))) {
+                    bw.write(a.getIdArticulo() + "," + a.getDescripcion() + "," + a.getExistencias() + "," + a.getPvp());
                     bw.newLine(); 
                     }
                 }
@@ -1512,7 +1755,7 @@ public class PracticaTienda implements Serializable {
                     for (Articulo a : articulos.values()) {
                         int total = 0;
                         for (Pedido p : pedidos) {
-                            total += p.getCestaCompra().stream().filter(l -> l.getArticulo().equals(a))
+                            total += p.getCestaCompra().stream().filter(lp -> lp.getArticulo().equals(a))
                                     .mapToInt(LineaPedido::getUnidades).sum();
                         }
                         System.out.println(a + " - " + total);
@@ -1530,7 +1773,7 @@ public class PracticaTienda implements Serializable {
                     articulos.values().stream()
                             .filter(a -> a.getExistencias() < 5)
                             .sorted(Comparator.comparing(Articulo::getExistencias))
-                            .forEach(a -> System.out.println(a.getDescription() + " - Stock: " + a.getExistencias()));
+                            .forEach(a -> System.out.println(a.getDescripcion() + " - Stock: " + a.getExistencias()));
                 }
                 case 4 -> {
                     // Agrupación por cliente
@@ -1601,7 +1844,7 @@ public class PracticaTienda implements Serializable {
         for (Articulo a : articulos.values()) {
             int total = 0;
             for (Pedido p : pedidos) {
-                total += p.getCestaCompra().stream().filter(l -> l.getArticulo().equals(a))
+                total += p.getCestaCompra().stream().filter(lp -> lp.getArticulo().equals(a))
                         .mapToInt(LineaPedido::getUnidades).sum();
             }
             System.out.println(a + " - " + total);
@@ -1620,10 +1863,10 @@ public class PracticaTienda implements Serializable {
         System.out.println("\n");
         for (Cliente c : clientes.values()) {
             int unidades = pedidos.stream().filter(p -> p.getClientePedido().equals(c))
-                    .flatMap(p -> p.getCestaCompra().stream()).filter(l -> l.getArticulo().equals(articulos.get("4-22")))
+                    .flatMap(p -> p.getCestaCompra().stream()).filter(lp -> lp.getArticulo().equals(articulos.get("4-22")))
                     .mapToInt(LineaPedido::getUnidades).sum();
 
-            System.out.println(c.getNombre() + ": " + unidades + " de " + articulos.get("4-22").getDescription());
+            System.out.println(c.getNombre() + ": " + unidades + " de " + articulos.get("4-22").getDescripcion());
         }
 
         //TODOS LOS ARTICULOS VENDIDOS, LOS ALMACENAMOS EN UN SET PARA EVITAR REPETICIONES
@@ -1645,7 +1888,7 @@ public class PracticaTienda implements Serializable {
                         .collect(Collectors.groupingBy(LineaPedido::getArticulo, Collectors.summingInt(LineaPedido::getUnidades)
                         ));
         for (Articulo a : unidadesPorArticulo.keySet()) {
-            System.out.println(a.getDescription() + " - " + unidadesPorArticulo.get(a));
+            System.out.println(a.getDescripcion() + " - " + unidadesPorArticulo.get(a));
         }
 
         articulos.values().stream()
@@ -1672,7 +1915,7 @@ public class PracticaTienda implements Serializable {
             int total = 0;
             for (Pedido p : pedidos) {
                 total += p.getCestaCompra().stream()
-                        .filter(l -> l.getArticulo().equals(a))
+                        .filter(lp -> lp.getArticulo().equals(a))
                         .mapToInt(LineaPedido::getUnidades)
                         .sum();
             }
@@ -1716,23 +1959,23 @@ public class PracticaTienda implements Serializable {
     public void pruebas() {
         List<Articulo> perifericos, almacenamiento, impresoras, monitores;
         perifericos = articulos.values()
-                .stream().filter(a -> a.getArticulo().startsWith("1"))
+                .stream().filter(a -> a.getIdArticulo().startsWith("1"))
                 .collect(Collectors.toList());
 
         almacenamiento = articulos.values()
-                .stream().filter(a -> a.getArticulo().startsWith("2"))
+                .stream().filter(a -> a.getIdArticulo().startsWith("2"))
                 .collect(Collectors.toList());
 
         impresoras = articulos.values()
-                .stream().filter(a -> a.getArticulo().startsWith("3"))
+                .stream().filter(a -> a.getIdArticulo().startsWith("3"))
                 .collect(Collectors.toList());
 
         monitores = articulos.values()
-                .stream().filter(a -> a.getArticulo().startsWith("4"))
+                .stream().filter(a -> a.getIdArticulo().startsWith("4"))
                 .collect(Collectors.toList());
 
         articulos.values()
-                .removeIf(a -> a.getArticulo().startsWith("3"));
+                .removeIf(a -> a.getIdArticulo().startsWith("3"));
 
         System.out.println(perifericos);
         System.out.println(almacenamiento);
@@ -1749,8 +1992,8 @@ public class PracticaTienda implements Serializable {
     //Importe Total de un Pedido
     public double totalPedido2(Pedido p) {
         return p.getCestaCompra().stream()
-                .mapToDouble(l -> l.getArticulo().getPvp()
-                * l.getUnidades()).sum();
+                .mapToDouble(lp -> lp.getArticulo().getPvp()
+                * lp.getUnidades()).sum();
     }
 
     /*
@@ -1760,9 +2003,9 @@ public class PracticaTienda implements Serializable {
         private int unidadesVendidas1(Articulo a) {
             int c = 0;
             for (Pedido p : pedidos) {
-                for (LineaPedido l : p.getCestaCompra()) {
-                    if (l.getArticulo().equals(a)) {
-                        c += l.getUnidades();
+                for (LineaPedido lp : p.getCestaCompra()) {
+                    if (lp.getArticulo().equals(a)) {
+                        c += lp.getUnidades();
                     }
                 }
             }
@@ -1775,7 +2018,7 @@ public class PracticaTienda implements Serializable {
         private int unidadesVendidas2(Articulo a) {
             int total = 0;
             for (Pedido p : pedidos) {
-                total += p.getCestaCompra().stream().filter(l -> l.getArticulo().equals(a))
+                total += p.getCestaCompra().stream().filter(lp -> lp.getArticulo().equals(a))
                         .mapToInt(LineaPedido::getUnidades).sum();
             }
             return total;
@@ -1786,7 +2029,7 @@ public class PracticaTienda implements Serializable {
 
         private int unidadesVendidas3(Articulo a) {
             return pedidos.stream().flatMap(p -> p.getCestaCompra().stream())
-                    .filter(l -> l.getArticulo().equals(a))
+                    .filter(lp -> lp.getArticulo().equals(a))
                     .mapToInt(LineaPedido::getUnidades).sum();
         }
      */

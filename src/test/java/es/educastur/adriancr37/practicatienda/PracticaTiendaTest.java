@@ -44,7 +44,7 @@ public class PracticaTiendaTest {
     @Test
     public void testCargaDatos() {
         assertAll(
-                () -> assertEquals(10, t.getArticulos().size()),
+                () -> assertEquals(10, t.getIdArticulos().size()),
                 () -> assertEquals(4,  t.getClientes().size()),
                 () -> assertEquals(5,  t.getPedidos().size())
         );
@@ -96,10 +96,10 @@ public class PracticaTiendaTest {
     @Test
     public void testStock() {
         assertAll(
-            () -> assertThrows(StockCero.class, () ->         {t.stock(t.getArticulos().get("1-11"),5);}),
-            () -> assertThrows(StockCero.class, () ->         {t.stock(t.getArticulos().get("2-33"),1);}),
-            () -> assertThrows(StockInsuficiente.class, () -> {t.stock(t.getArticulos().get("3-11"),5);}),
-            () -> assertThrows(StockInsuficiente.class, () -> {t.stock(t.getArticulos().get("3-22"),10);})
+            () -> assertThrows(StockCero.class, () ->         {t.stock(t.getIdArticulos().get("1-11"),5);}),
+            () -> assertThrows(StockCero.class, () ->         {t.stock(t.getIdArticulos().get("2-33"),1);}),
+            () -> assertThrows(StockInsuficiente.class, () -> {t.stock(t.getIdArticulos().get("3-11"),5);}),
+            () -> assertThrows(StockInsuficiente.class, () -> {t.stock(t.getIdArticulos().get("3-22"),10);})
         );
     }
 }

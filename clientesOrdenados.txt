@@ -1,0 +1,32 @@
+
+	CLIENTE
+───────────────────────
+ID:       80580845T
+Nombre:   ANA
+Teléfono: 658111111
+Email:    ana@gmail.com
+
+
+	CLIENTE
+───────────────────────
+ID:       02337565Y
+Nombre:   EDU
+Teléfono: 634567890
+Email:    edu@gmail.com
+
+
+	CLIENTE
+───────────────────────
+ID:       63921307Y
+Nombre:   JUAN
+Teléfono: 652333333
+Email:    juan@gmail.com
+
+
+	CLIENTE
+───────────────────────
+ID:       36347775R
+Nombre:   LOLA
+Teléfono: 649222222
+Email:    lola@gmail.com
+
