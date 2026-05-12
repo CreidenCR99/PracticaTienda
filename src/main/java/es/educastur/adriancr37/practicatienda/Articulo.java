@@ -28,7 +28,7 @@ public class Articulo implements Serializable {
         return descripcion;
     }
 
-    public void setdescripcion(String descripcion) {
+    public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
 

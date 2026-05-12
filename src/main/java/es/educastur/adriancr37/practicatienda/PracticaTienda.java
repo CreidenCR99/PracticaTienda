@@ -85,8 +85,10 @@ public class PracticaTienda implements Serializable {
         t.cargaDatos();
         t.jdbcLeeArticulos();
         t.jdbcLeeClientes();
+        t.jdbcLeePedidos();
         t.jdbcGuardaArticulos();
         t.jdbcGuardaClientes();
+        t.jdbcGuardaPedidos();
         t.menuOpciones();
 
         /*PracticaTienda tImportada = t.importarTiendaCompleta();
@@ -176,41 +178,69 @@ public class PracticaTienda implements Serializable {
         }
         System.out.println("CLIENTES exportados a MySQL correctamente");
     }
-/*
-    private void jdbcLeePedidos() {
-        Statement sentencia;
-        ArrayList<Pedido> pedidosAux = new ArrayList();
 
-        String consultaSQL = "SELECT * FROM pedidos";
+    private void jdbcLeePedidos(){
+        Statement sentenciaPedidos,sentenciaLp;
+        
+        /*LEER LOS PEDIDOS DESDE LA BD Y CREAR EL ARRAYLIST PEDIDOS. 
+        ES MÁS COMPLICADO PUES LA INFORMACIÓN ESTÁ EN 2 TABLAS  */
+       
+        String consultaPedidos ="SELECT * FROM pedidos";
         try {
-            sentencia = Conexion.obtener().createStatement();
-            ResultSet rs = sentencia.executeQuery(consultaSQL);
-            while (rs.next()) {
-                pedidosAux.add(new Pedido(rs.getString(1), rs.getString(2), (rs.getDate(3)).toLocalDate(), (ArrayList<LineaPedido>) rs.getObject(4)));
+            sentenciaPedidos = Conexion.obtener().createStatement();
+            ResultSet rsPedidos=sentenciaPedidos.executeQuery(consultaPedidos);
+            while (rsPedidos.next())
+            {
+                ArrayList <LineaPedido> cestaCompra = new ArrayList();
+                String consultaLp ="SELECT * FROM lineaspedidos WHERE idPedido='"+ rsPedidos.getString(1)+"'";
+                sentenciaLp = Conexion.obtener().createStatement();
+                ResultSet rsLp=sentenciaLp.executeQuery(consultaLp);
+                while (rsLp.next())
+                {
+                   cestaCompra.add(new LineaPedido(articulos.get(rsLp.getString(2)),rsLp.getInt(3)));
+                }
+                pedidos.add(new Pedido(rsPedidos.getString(1),clientes.get(rsPedidos.getString(2))
+                        ,LocalDate.parse(rsPedidos.getString(3)),cestaCompra));
             }
-            System.out.println("PEDIDOS importados desde MySQL correctamente");
-        } catch (ClassNotFoundException | SQLException e) {
-            System.out.println(e.toString());
+            System.out.println("\nPEDIDOS importados desde MySQL correctamente");
+        }catch (ClassNotFoundException | SQLException e) {
+                System.out.println(e.toString());
         }
-
-        pedidosAux.stream().forEach(System.out::println);
+        
+        /* MOSTRAMOS LA COLECCION POR PANTALLA PARA VERIFICAR QUE SE HA IMPORTADO CORRECTAMENTE */
+          
+        System.out.println("\nLISTADO PEDIDOS IMPORTADOS DESDE LA B.D:");
+        pedidos.stream().forEach(System.out::println);
     }
 
-    private void jdbcGuardaPedidos() {
-        String consulta;
-
-        for (Pedido p : pedidos) {
-            consulta = "INSERT INTO `pedidos` (`idPedido`, `idCliente`, `fecha`)"
-                    + " VALUES ('" + p.getIdPedido() + "', '" + p.getClientePedido().getIdCliente() + "', '" + p.getFechaPedido() + "')";
+   private void jdbcGuardaPedidos(){
+        /* LOS OBJETOS SON MÁS RICOS QUE EL MODELO RELACIONAL, Y NUESTRA CLASE Pedido LA HEMOS HECHO ASÍ PARA 
+        EXPLICAR Y ENTENDER LAS RELACIONES DE AGREGACIÓN Y COMPOSICIÓN ENTRE CLASES.
+        PARA LLEVAR NUESTROS PEDIDOS "java" A UNA BD RELACIONAL, Y GUARDAR TODA LA INFO DE CADA PEDIDO 
+        DEL ARRAYLIST JAVA HEMOS DE UTILIZAR 2 TABLAS POR SEPARADO EN LA BD */
+        
+          for (Pedido p:pedidos){
+            String consulta1= "INSERT INTO `pedidos` (`idPedido`, `clientePedido`, `fechaPedido`)"
+                    + " VALUES ('" + p.getIdPedido()+"', '"+p.getClientePedido().getIdCliente()+"','"+p.getFechaPedido()+"')";
+            for (LineaPedido l:p.getCestaCompra()){
+                String consulta2= "INSERT INTO `lineaspedidos` (`idPedido`, `idArticulo`, `unidades`)"
+                    + " VALUES ('" + p.getIdPedido()+"', '"+l.getArticulo().getIdArticulo()+"','"+l.getUnidades()+"')";
+                try {
+                    PreparedStatement ps = Conexion.obtener().prepareStatement(consulta2);
+                    ps.executeUpdate();
+                } catch (ClassNotFoundException | SQLException e) {
+                    System.out.println(e.toString());
+                }
+            }
             try {
-                PreparedStatement ps = Conexion.obtener().prepareStatement(consulta);
+                PreparedStatement ps = Conexion.obtener().prepareStatement(consulta1);
                 ps.executeUpdate();
             } catch (ClassNotFoundException | SQLException e) {
                 System.out.println(e.toString());
             }
         }
         System.out.println("PEDIDOS exportados a MySQL correctamente");
-    }*/
+    }
 
     //#region Backup
     /*public void cargaDatos() {
